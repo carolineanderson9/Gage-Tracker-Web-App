@@ -54,7 +54,11 @@
     .popup-box h3 { color: #2c3e50; margin-bottom: 25px; font-size: 22px; }
     .popup-box p { margin: 8px 0; font-size: 18px; }
     .popup-box label { display: block; margin: 10px 0 5px; text-align: left; font-weight: bold; }
-    .popup-box input { width: 100%; padding: 16px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 18px; min-height: 50px; }
+    .popup-box input, .popup-box textarea { 
+      width: 100%; padding: 16px; border: 2px solid #bdc3c7; border-radius: 8px; 
+      font-size: 18px; min-height: 50px; resize: vertical;
+    }
+    .popup-box textarea { min-height: 100px; font-family: inherit; }
     .popup-btn-group { display: flex; gap: 15px; margin-top: 25px; }
     .popup-btn-group button { 
       flex: 1; padding: 16px; font-size: 18px; border: none; 
@@ -216,11 +220,22 @@
     .btn-edit:active { background: #138496; }
     .btn-delete { background: #dc3545; }
     .btn-delete:active { background: #c82333; }
+    /* GREEN NOTES BUTTON */
+    .btn-notes { background: #2ecc71; }
+    .btn-notes:active { background: #27ae60; }
     
     .no-data { 
       text-align: center; color: #6c757d; font-style: italic; 
       padding: 50px 20px; background: #f8f9fa; border-radius: 10px;
       font-size: 18px;
+    }
+
+    /* GREEN NOTES INDICATOR */
+    .notes-indicator {
+      position: absolute; top: 10px; right: 10px;
+      background: #2ecc71; color: white; border-radius: 50%;
+      width: 20px; height: 20px; font-size: 12px; display: flex;
+      align-items: center; justify-content: center; font-weight: bold;
     }
   </style>
 </head>
@@ -247,7 +262,7 @@
     <p class="subtitle">Excel Tool & Mfg. - <strong>Gage</strong> Management System</p>
 
     <div id="searchSection">
-      <input type="text" id="searchInput" placeholder="Search by Gage ID..." oninput="searchGages(this.value)">
+      <input type="text" id="searchInput" placeholder="Search by Gage ID or Size..." oninput="searchGages(this.value)">
       <button id="searchBtn" onclick="loadGages()">Search</button>
     </div>
 
@@ -303,10 +318,11 @@
           <h3>Add New Gage</h3>
           <label>Gage ID:</label><input type="text" id="newGageId" required>
           <label>Gage Type:</label><input type="text" id="newGageType" required>
-          <label>Size:</label><input type="text" id="newSize">
+          <label>Size:</label><input type="text" id="newSize" required>
           <label>Last Calibration Date:</label><input type="date" id="newLastCalibrationDate" required>
           <label>Calibration Due Date:</label><input type="date" id="newCalibrationDueDate" required>
           <label>Total Uses Allowed:</label><input type="number" id="newTotalUsesAllowed" value="300" min="1" required>
+          <label>Notes:</label><textarea id="newNotes" placeholder="Add any notes about this gage..."></textarea>
           <div class="popup-btn-group">
             <button class="btn-save" onclick="saveNewGage()">Save</button>
             <button class="btn-cancel" onclick="closePopup()">Cancel</button>
@@ -323,15 +339,16 @@
       const lastCalibrationDate = document.getElementById('newLastCalibrationDate').value;
       const calibrationDueDate = document.getElementById('newCalibrationDueDate').value;
       const totalUsesAllowed = parseInt(document.getElementById('newTotalUsesAllowed').value);
+      const notes = document.getElementById('newNotes').value.trim();
 
-      if (!gageId || !gageType || !lastCalibrationDate || !calibrationDueDate || !totalUsesAllowed) {
+      if (!gageId || !gageType || !size || !lastCalibrationDate || !calibrationDueDate || !totalUsesAllowed) {
         alert('Please fill in all required fields');
         return;
       }
 
       await push(ref(db, 'gauges'), {
         gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
-        totalUses: 0, inUse: false, usageLimitReached: false
+        notes, totalUses: 0, inUse: false, usageLimitReached: false
       });
       
       alert('New gage added successfully!');
@@ -358,7 +375,14 @@
         for (const key in data) {
           const g = data[key];
           
-          if (searchTerm && !g.gageId.toLowerCase().includes(searchTerm.toLowerCase())) continue;
+          // SEARCH BY GAGE ID OR SIZE (case insensitive)
+          if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            if (!g.gageId.toLowerCase().includes(searchLower) && 
+                !g.size.toLowerCase().includes(searchLower)) {
+              continue;
+            }
+          }
 
           foundAny = true;
           let status = 'AVAILABLE';
@@ -368,6 +392,7 @@
           let calBtn = '';
           let returnCalBtn = '';
           let limitWarning = '';
+          let notesIndicator = g.notes ? '<div class="notes-indicator">📝</div>' : '';
 
           if (g.inUse) {
             status = 'IN USE';
@@ -394,12 +419,13 @@
                 <div class="gage-id">
                   <span>${g.gageId} - ${g.gageType}</span>
                   <span class="gage-status ${statusClass}">${status}</span>
+                  ${notesIndicator}
                 </div>
               </div>
               <div class="gage-details">
                 <div class="detail-item">
                   <div class="detail-label">Size</div>
-                  <div class="detail-value">${g.size || 'N/A'}</div>
+                  <div class="detail-value">${g.size}</div>
                 </div>
                 <div class="detail-item">
                   <div class="detail-label">Cal Date</div>
@@ -425,6 +451,7 @@
               ${limitWarning}
               <div class="gage-actions">
                 ${checkoutBtn} ${calBtn} ${checkinBtn} ${returnCalBtn}
+                <button class="btn-notes" onclick="editNotes('${key}'); event.stopPropagation();">Notes</button>
                 <button class="btn-edit" onclick="editGage('${key}'); event.stopPropagation();">Edit</button>
                 <button class="btn-delete" onclick="deleteGage('${key}'); event.stopPropagation();">Remove</button>
               </div>
@@ -465,7 +492,7 @@
           <h3>Gage Profile: ${g.gageId}</h3>
           <p><strong>Gage ID:</strong> ${g.gageId}</p>
           <p><strong>Type:</strong> ${g.gageType}</p>
-          <p><strong>Size:</strong> ${g.size || 'N/A'}</p>
+          <p><strong>Size:</strong> ${g.size}</p>
           ${statusHtml}
           <p><strong>Last Calibration Date:</strong> ${g.lastCalibrationDate}</p>
           <p><strong>Calibration Due Date:</strong> ${g.calibrationDueDate}</p>
@@ -473,10 +500,48 @@
           <p><strong>Total Current Uses:</strong> ${g.totalUses || 0}</p>
           <p><strong>Remaining Uses:</strong> ${remainingUses}</p>
           ${g.checkedOutBy ? `<p><strong>Checked Out By:</strong> ${g.checkedOutBy}</p>` : ''}
+          <p><strong>Notes:</strong></p>
+          <div style="background:#f8f9fa; padding:15px; border-radius:8px; min-height:60px; text-align:left; border:1px solid #dee2e6;">
+            ${g.notes || '<em>No notes added</em>'}
+          </div>
           <button class="btn-cancel" onclick="closePopup()">Close</button>
         </div>
       `;
       document.body.appendChild(popup);
+    };
+
+    window.editNotes = async function(key) {
+      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const g = gageSnap.val();
+      
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <h3>Notes for ${g.gageId}</h3>
+          <p><em>Notes are visible to all employees</em></p>
+          <label>Notes:</label>
+          <textarea id="editNotes" placeholder="Add notes about this gage...">${g.notes || ''}</textarea>
+          <div class="popup-btn-group">
+            <button class="btn-save" onclick="saveNotes('${key}')">Save Notes</button>
+            <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+    };
+
+    window.saveNotes = async function(key) {
+      const notes = document.getElementById('editNotes').value.trim();
+      
+      await update(ref(db, `gauges/${key}`), {
+        notes: notes || null
+      });
+      
+      alert('Notes saved successfully!');
+      closePopup();
+      loadGages();
     };
 
     window.editGage = async function(key) {
@@ -491,11 +556,12 @@
           <h3>Edit Gage Profile: ${g.gageId}</h3>
           <label>Gage ID:</label><input type="text" id="editGageId" value="${g.gageId}">
           <label>Gage Type:</label><input type="text" id="editGageType" value="${g.gageType}">
-          <label>Size:</label><input type="text" id="editSize" value="${g.size || ''}">
+          <label>Size:</label><input type="text" id="editSize" value="${g.size}">
           <label>Last Calibration Date:</label><input type="date" id="editLastCalibrationDate" value="${g.lastCalibrationDate}">
           <label>Calibration Due Date:</label><input type="date" id="editCalibrationDueDate" value="${g.calibrationDueDate}">
           <label>Total Uses Allowed:</label><input type="number" id="editTotalUsesAllowed" value="${g.totalUsesAllowed}">
           <label>Total Current Uses:</label><input type="number" id="editTotalCurrentUses" value="${g.totalUses || 0}" readonly>
+          <label>Notes:</label><textarea id="editNotes" style="min-height:80px;">${g.notes || ''}</textarea>
           <div class="popup-btn-group">
             <button class="btn-save" onclick="saveEdit('${key}')">Save</button>
             <button class="btn-cancel" onclick="closePopup()">Cancel</button>
@@ -512,9 +578,10 @@
       const lastCalibrationDate = document.getElementById('editLastCalibrationDate').value;
       const calibrationDueDate = document.getElementById('editCalibrationDueDate').value;
       const totalUsesAllowed = parseInt(document.getElementById('editTotalUsesAllowed').value);
+      const notes = document.getElementById('editNotes').value.trim();
 
       await update(ref(db, `gauges/${key}`), {
-        gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
+        gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, notes,
         usageLimitReached: false
       });
       alert('Gage profile updated!');
@@ -656,6 +723,9 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closePopup();
     });
+
+    // LOAD GAGES ON START
+    loadGages();
   </script>
 </body>
 </html>
