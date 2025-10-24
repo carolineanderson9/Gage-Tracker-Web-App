@@ -284,22 +284,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-        const auth = getAuth(app);
-    let userId = null;
-
-    // Anonymous sign-in
-    signInAnonymously(auth).catch((error) => {
-      console.error("Auth failed:", error);
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userId = user.uid;
-        console.log("Signed in as:", userId);
-      } else {
-        console.log("No user");
-      }
-    });
     const auth = getAuth(app);
     let currentEmployee = '';
     let userId = null;
@@ -424,7 +408,7 @@
           let calBtn = '';
           let returnCalBtn = '';
           let limitWarning = '';
-          let notesIndicator = g.notes ? '<div class="notes-indicator">Notes</div>' : '';
+          let notesIndicator = g.notes ? '<div class="notes-indicator">N</div>' : '';
 
           if (g.inUse) {
             status = 'IN USE';
@@ -739,7 +723,7 @@
       });
 
       const message = usageLimitReached ? 
-        `${g.gage DeliaId} checked in - USAGE LIMIT REACHED!` : 
+        `${g.gageId} checked in - USAGE LIMIT REACHED!` : 
         `${g.gageId} checked in. Usage: ${usageAmount}`;
       
       alert(message);
@@ -761,4 +745,3 @@
   </script>
 </body>
 </html>
-
