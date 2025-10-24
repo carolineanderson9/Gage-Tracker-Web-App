@@ -220,7 +220,6 @@
     .btn-edit:active { background: #138496; }
     .btn-delete { background: #dc3545; }
     .btn-delete:active { background: #c82333; }
-    /* GREEN NOTES BUTTON */
     .btn-notes { background: #2ecc71; }
     .btn-notes:active { background: #27ae60; }
     
@@ -230,7 +229,6 @@
       font-size: 18px;
     }
 
-    /* GREEN NOTES INDICATOR */
     .notes-indicator {
       position: absolute; top: 10px; right: 10px;
       background: #2ecc71; color: white; border-radius: 50%;
@@ -254,7 +252,7 @@
   <div class="container" id="mainApp">
     <div class="employee-info">
       <strong>Logged in as: <span id="currentEmployee"></span></strong>
-      <button class="add-gage-btn" onclick="addNewGage()">➕ Add Gage</button>
+      <button class="add-gage-btn" onclick="addNewGage()">Add Gage</button>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
     
@@ -272,24 +270,42 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, get, update, remove, push } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-  const firebaseConfig = {
-  apiKey: "YOUR_NEW_API_KEY_FROM_FIREBASE",
-  authDomain: "gage-tracker-new.firebaseapp.com",
-  databaseURL: "https://gage-tracker-new-default-rtdb.firebaseio.com",
-  projectId: "gage-tracker-new",
-  storageBucket: "gage-tracker-new.appspot.com",
-  messagingSenderId: "YOUR_NEW_SENDER_ID",
-  appId: "YOUR_NEW_APP_ID"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWPGjFxBhzLqzBSsDogqKKwEXWyLGAIwE",
+      authDomain: "gagetracker-b8cf5.firebaseapp.com",
+      databaseURL: "https://gagetracker-b8cf5-default-rtdb.firebaseio.com",
+      projectId: "gagetracker-b8cf5",
+      storageBucket: "gagetracker-b8cf5.firebasestorage.app",
+      messagingSenderId: "1024733799973",
+      appId: "1:1024733799973:web:eedc6f1875885701b5c1cc"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
     let currentEmployee = '';
+    let userId = null;
+
+    // Anonymous sign-in
+    signInAnonymously(auth).catch((error) => {
+      console.error("Auth failed:", error);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userId = user.uid;
+        console.log("Signed in as:", userId);
+      } else {
+        console.log("No user");
+      }
+    });
 
     window.login = function() {
       const name = document.getElementById('employeeName').value.trim();
       if (!name) { alert('Please enter your name'); return; }
+      if (!userId) { alert('Auth not ready. Try again in 2 sec.'); return; }
       currentEmployee = name;
       document.getElementById('currentEmployee').textContent = name;
       document.getElementById('loginOverlay').style.display = 'none';
@@ -299,6 +315,7 @@
 
     window.logout = function() {
       currentEmployee = '';
+      userId = null;
       document.getElementById('loginOverlay').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('employeeName').value = '';
@@ -333,6 +350,7 @@
     };
 
     window.saveNewGage = async function() {
+      if (!userId) { alert('Auth not ready'); return; }
       const gageId = document.getElementById('newGageId').value.trim();
       const gageType = document.getElementById('newGageType').value.trim();
       const size = document.getElementById('newSize').value.trim();
@@ -346,7 +364,7 @@
         return;
       }
 
-      await push(ref(db, 'gauges'), {
+      await push(ref(db, `gauges/${userId}`), {
         gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
         notes, totalUses: 0, inUse: false, usageLimitReached: false
       });
@@ -357,11 +375,12 @@
     };
 
     window.loadGages = async function(searchTerm = '') {
+      if (!userId) { alert('Auth not ready'); return; }
       const list = document.getElementById('gaugesList');
       list.innerHTML = '<h3>Gage Catalog</h3>';
 
       try {
-        const snapshot = await get(ref(db, 'gauges'));
+        const snapshot = await get(ref(db, `gauges/${userId}`));
         const data = snapshot.val();
 
         if (!data) {
@@ -375,13 +394,10 @@
         for (const key in data) {
           const g = data[key];
           
-          // SEARCH BY GAGE ID OR SIZE (case insensitive)
           if (searchTerm) {
             const searchLower = searchTerm.toLowerCase();
             if (!g.gageId.toLowerCase().includes(searchLower) && 
-                !g.size.toLowerCase().includes(searchLower)) {
-              continue;
-            }
+                !g.size.toLowerCase().includes(searchLower)) continue;
           }
 
           foundAny = true;
@@ -392,7 +408,7 @@
           let calBtn = '';
           let returnCalBtn = '';
           let limitWarning = '';
-          let notesIndicator = g.notes ? '<div class="notes-indicator">📝</div>' : '';
+          let notesIndicator = g.notes ? '<div class="notes-indicator">Notes</div>' : '';
 
           if (g.inUse) {
             status = 'IN USE';
@@ -405,7 +421,7 @@
           } else if (g.usageLimitReached) {
             status = 'LIMIT REACHED';
             statusClass = 'status-limit';
-            limitWarning = `<div class="limit-warning">⚠️ USAGE LIMIT REACHED</div>`;
+            limitWarning = `<div class="limit-warning">USAGE LIMIT REACHED</div>`;
           } else {
             checkoutBtn = `<button class="btn-checkout" onclick="checkoutGauge('${key}')">Check Out</button>`;
             calBtn = `<button class="btn-calibration" onclick="checkoutToCalibration('${key}')">To Calibration</button>`;
@@ -474,14 +490,14 @@
     };
 
     window.showGageProfile = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       const remainingUses = g.totalUsesAllowed - (g.totalUses || 0);
       
       let statusHtml = '';
       if (g.inUse) statusHtml = `<p><strong>Status:</strong> IN USE</p>`;
       else if (g.toCalibration) statusHtml = `<p><strong>Status:</strong> IN CALIBRATION</p>`;
-      else if (g.usageLimitReached) statusHtml = `<p class="limit-warning"><strong>⚠️ USAGE LIMIT REACHED</strong></p>`;
+      else if (g.usageLimitReached) statusHtml = `<p class="limit-warning"><strong>USAGE LIMIT REACHED</strong></p>`;
       else statusHtml = `<p><strong>Status:</strong> AVAILABLE</p>`;
 
       const popup = document.createElement('div');
@@ -511,7 +527,7 @@
     };
 
     window.editNotes = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -535,7 +551,7 @@
     window.saveNotes = async function(key) {
       const notes = document.getElementById('editNotes').value.trim();
       
-      await update(ref(db, `gauges/${key}`), {
+      await update(ref(db, `gauges/${userId}/${key}`), {
         notes: notes || null
       });
       
@@ -545,7 +561,7 @@
     };
 
     window.editGage = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -580,7 +596,7 @@
       const totalUsesAllowed = parseInt(document.getElementById('editTotalUsesAllowed').value);
       const notes = document.getElementById('editNotes').value.trim();
 
-      await update(ref(db, `gauges/${key}`), {
+      await update(ref(db, `gauges/${userId}/${key}`), {
         gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, notes,
         usageLimitReached: false
       });
@@ -591,15 +607,15 @@
 
     window.deleteGage = async function(key) {
       if (confirm('Are you sure?')) {
-        await remove(ref(db, `gauges/${key}`));
+        await remove(ref(db, `gauges/${userId}/${key}`));
         alert('Gage removed');
         loadGages();
       }
     };
 
     window.checkoutToCalibration = async function(key) {
-      const gageId = (await get(ref(db, `gauges/${key}/gageId`))).val();
-      await update(ref(db, `gauges/${key}`), {
+      const gageId = (await get(ref(db, `gauges/${userId}/${key}/gageId`))).val();
+      await update(ref(db, `gauges/${userId}/${key}`), {
         toCalibration: true, inUse: false, checkedOutBy: currentEmployee
       });
       alert(`${gageId} sent to calibration by ${currentEmployee}`);
@@ -607,9 +623,9 @@
     };
 
     window.returnFromCalibration = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
-      await update(ref(db, `gauges/${key}`), {
+      await update(ref(db, `gauges/${userId}/${key}`), {
         toCalibration: false,
         lastCalibrationDate: new Date().toISOString().split('T')[0],
         totalUses: 0,
@@ -620,11 +636,11 @@
     };
 
     window.checkoutGauge = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       
       if (g.usageLimitReached) {
-        alert('⚠️ USAGE LIMIT REACHED - Cannot check out!');
+        alert('USAGE LIMIT REACHED - Cannot check out!');
         return;
       }
 
@@ -656,7 +672,7 @@
         return;
       }
       
-      await update(ref(db, `gauges/${key}`), {
+      await update(ref(db, `gauges/${userId}/${key}`), {
         inUse: true, currentJob: job, currentPart: part,
         checkoutDate: date, checkedOutBy: currentEmployee,
         toCalibration: false
@@ -667,7 +683,7 @@
     };
 
     window.checkinGauge = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -693,13 +709,13 @@
         return;
       }
 
-      const gageSnap = await get(ref(db, `gauges/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
       const g = gageSnap.val();
       
       const newTotalUses = (g.totalUses || 0) + usageAmount;
       const usageLimitReached = newTotalUses >= g.totalUsesAllowed;
 
-      await update(ref(db, `gauges/${key}`), {
+      await update(ref(db, `gauges/${userId}/${key}`), {
         inUse: false, currentJob: '', currentPart: '', checkedOutBy: '',
         totalUses: newTotalUses, checkedInBy: currentEmployee,
         lastUsageAmount: usageAmount, lastCheckIn: new Date().toISOString().split('T')[0],
@@ -707,7 +723,7 @@
       });
 
       const message = usageLimitReached ? 
-        `⚠️ ${g.gageId} checked in - USAGE LIMIT REACHED!` : 
+        `${g.gage DeliaId} checked in - USAGE LIMIT REACHED!` : 
         `${g.gageId} checked in. Usage: ${usageAmount}`;
       
       alert(message);
@@ -729,4 +745,3 @@
   </script>
 </body>
 </html>
-
