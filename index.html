@@ -284,6 +284,22 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+        const auth = getAuth(app);
+    let userId = null;
+
+    // Anonymous sign-in
+    signInAnonymously(auth).catch((error) => {
+      console.error("Auth failed:", error);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userId = user.uid;
+        console.log("Signed in as:", userId);
+      } else {
+        console.log("No user");
+      }
+    });
     const auth = getAuth(app);
     let currentEmployee = '';
     let userId = null;
@@ -745,3 +761,4 @@
   </script>
 </body>
 </html>
+
