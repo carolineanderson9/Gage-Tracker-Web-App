@@ -285,10 +285,7 @@
     const db = getDatabase(app);
     let currentEmployee = '';
 
-    // === SECRET KEY - ONLY YOUR APP KNOWS THIS ===
-    const APP_KEY = "ExcelToolGage2025!";  // CHANGE THIS TO ANYTHING YOU WANT
-    await set(ref(db, 'settings/appKey'), APP_KEY);
-
+  
     window.login = function() {
       const name = document.getElementById('employeeName').value.trim();
       if (!name) { alert('Please enter your name'); return; }
@@ -728,4 +725,5 @@
   </script>
 </body>
 </html>
+
 
