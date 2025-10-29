@@ -270,7 +270,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, get, update, remove, push } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBWPGjFxBhzLqzBSsDogqKKwEXWyLGAIwE",
@@ -284,28 +283,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
     let currentEmployee = '';
-    let userId = null;
 
-    // Anonymous sign-in
-    signInAnonymously(auth).catch((error) => {
-      console.error("Auth failed:", error);
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userId = user.uid;
-        console.log("Signed in as:", userId);
-      } else {
-        console.log("No user");
-      }
-    });
+    // === SECRET KEY - ONLY YOUR APP KNOWS THIS ===
+    const APP_KEY = "ExcelToolGage2025!";  // CHANGE THIS TO ANYTHING YOU WANT
+    await set(ref(db, '.settings/appKey'), APP_KEY);
 
     window.login = function() {
       const name = document.getElementById('employeeName').value.trim();
       if (!name) { alert('Please enter your name'); return; }
-      if (!userId) { alert('Auth not ready. Try again in 2 sec.'); return; }
       currentEmployee = name;
       document.getElementById('currentEmployee').textContent = name;
       document.getElementById('loginOverlay').style.display = 'none';
@@ -315,7 +301,6 @@
 
     window.logout = function() {
       currentEmployee = '';
-      userId = null;
       document.getElementById('loginOverlay').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('employeeName').value = '';
@@ -350,7 +335,6 @@
     };
 
     window.saveNewGage = async function() {
-      if (!userId) { alert('Auth not ready'); return; }
       const gageId = document.getElementById('newGageId').value.trim();
       const gageType = document.getElementById('newGageType').value.trim();
       const size = document.getElementById('newSize').value.trim();
@@ -364,7 +348,7 @@
         return;
       }
 
-      await push(ref(db, `gauges/${userId}`), {
+      await push(ref(db, 'gauges'), {
         gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
         notes, totalUses: 0, inUse: false, usageLimitReached: false
       });
@@ -375,12 +359,11 @@
     };
 
     window.loadGages = async function(searchTerm = '') {
-      if (!userId) { alert('Auth not ready'); return; }
       const list = document.getElementById('gaugesList');
       list.innerHTML = '<h3>Gage Catalog</h3>';
 
       try {
-        const snapshot = await get(ref(db, `gauges/${userId}`));
+        const snapshot = await get(ref(db, 'gauges'));
         const data = snapshot.val();
 
         if (!data) {
@@ -490,7 +473,7 @@
     };
 
     window.showGageProfile = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       const remainingUses = g.totalUsesAllowed - (g.totalUses || 0);
       
@@ -527,7 +510,7 @@
     };
 
     window.editNotes = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -551,7 +534,7 @@
     window.saveNotes = async function(key) {
       const notes = document.getElementById('editNotes').value.trim();
       
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      await update(ref(db, `gauges/${key}`), {
         notes: notes || null
       });
       
@@ -561,7 +544,7 @@
     };
 
     window.editGage = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -596,7 +579,7 @@
       const totalUsesAllowed = parseInt(document.getElementById('editTotalUsesAllowed').value);
       const notes = document.getElementById('editNotes').value.trim();
 
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      await update(ref(db, `gauges/${key}`), {
         gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, notes,
         usageLimitReached: false
       });
@@ -607,15 +590,15 @@
 
     window.deleteGage = async function(key) {
       if (confirm('Are you sure?')) {
-        await remove(ref(db, `gauges/${userId}/${key}`));
+        await remove(ref(db, `gauges/${key}`));
         alert('Gage removed');
         loadGages();
       }
     };
 
     window.checkoutToCalibration = async function(key) {
-      const gageId = (await get(ref(db, `gauges/${userId}/${key}/gageId`))).val();
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      const gageId = (await get(ref(db, `gauges/${key}/gageId`))).val();
+      await update(ref(db, `gauges/${key}`), {
         toCalibration: true, inUse: false, checkedOutBy: currentEmployee
       });
       alert(`${gageId} sent to calibration by ${currentEmployee}`);
@@ -623,9 +606,9 @@
     };
 
     window.returnFromCalibration = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      await update(ref(db, `gauges/${key}`), {
         toCalibration: false,
         lastCalibrationDate: new Date().toISOString().split('T')[0],
         totalUses: 0,
@@ -636,7 +619,7 @@
     };
 
     window.checkoutGauge = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       
       if (g.usageLimitReached) {
@@ -672,7 +655,7 @@
         return;
       }
       
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      await update(ref(db, `gauges/${key}`), {
         inUse: true, currentJob: job, currentPart: part,
         checkoutDate: date, checkedOutBy: currentEmployee,
         toCalibration: false
@@ -683,7 +666,7 @@
     };
 
     window.checkinGauge = async function(key) {
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       
       const popup = document.createElement('div');
@@ -709,13 +692,13 @@
         return;
       }
 
-      const gageSnap = await get(ref(db, `gauges/${userId}/${key}`));
+      const gageSnap = await get(ref(db, `gauges/${key}`));
       const g = gageSnap.val();
       
       const newTotalUses = (g.totalUses || 0) + usageAmount;
       const usageLimitReached = newTotalUses >= g.totalUsesAllowed;
 
-      await update(ref(db, `gauges/${userId}/${key}`), {
+      await update(ref(db, `gauges/${key}`), {
         inUse: false, currentJob: '', currentPart: '', checkedOutBy: '',
         totalUses: newTotalUses, checkedInBy: currentEmployee,
         lastUsageAmount: usageAmount, lastCheckIn: new Date().toISOString().split('T')[0],
