@@ -13,110 +13,79 @@
   <style>
     * { box-sizing: border-box; touch-action: manipulation; }
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       margin: 0; padding: 0;
       background: linear-gradient(135deg, #f6f8fc 0%, #d9e3f0 100%);
       min-height: 100vh; color: #2c3e50;
-      -webkit-overflow-scrolling: touch;
     }
 
-    /* FAB */
     .fab {
       position: fixed; bottom: 32px; right: 32px;
       width: 60px; height: 60px; border-radius: 50%;
       background: #3498db; color: white;
       font-size: 36px; line-height: 60px; text-align: center;
       border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 999; cursor: pointer; transition: all 0.2s ease;
+      z-index: 999; cursor: pointer;
     }
-    .fab:active { transform: scale(0.95); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+    .fab:active { transform: scale(0.95); }
 
-    /* Login & popups */
-    .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .login-box { background: white; padding: 32px; border-radius: 12px; text-align: center; max-width: 90%; width: 360px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-box { background: white; padding: 32px; border-radius: 12px; width: 360px; max-width: 90%; box-shadow: 0 6px 20px rgba(0,0,0,0.2); text-align: center; }
     .login-input { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
     .login-btn { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
 
-    .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; display: none; }
-    .popup-box { background: white; padding: 32px; border-radius: 12px; text-align: center; max-width: 95%; width: 480px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); max-height: 85vh; overflow-y: auto; position: relative; }
+    .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; display: none; }
+    .popup-box { background: white; padding: 32px; border-radius: 12px; max-width: 95%; width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.2); position: relative; }
     .popup-box label { display: block; margin: 8px 0 4px; text-align: left; font-weight: 600; color: #4b5563; }
-    .popup-box input, .popup-box textarea { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; resize: vertical; }
+    .popup-box input, .popup-box textarea, .popup-box select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
     .popup-btn-group { display: flex; gap: 12px; margin-top: 20px; }
-    .popup-btn-group button { flex: 1; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-save { background: #10b981; color: white; flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-cancel { background: #9ca3af; color: white; flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; }
 
-    /* Main app */
-    .container { max-width: 100%; width: 100%; padding: 24px; background: white; min-height: 100vh; display: none; }
-    @media (min-width: 769px) { .container { max-width: 900px; margin: 24px auto; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); } }
+    .container { padding: 24px; background: white; min-height: 100vh; display: none; }
     .employee-info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
     h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
-    .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; font-weight: 400; }
+    .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
 
-    /* Uniform buttons */
-    .btn, .backup-btn, .logout-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; padding: 8px 16px; transition: all 0.2s; min-height: 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .btn:active, .backup-btn:active, .logout-btn:active { background: #2563eb; transform: scale(0.98); }
+    .btn, .logout-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
     .logout-btn { background: #ef4444; }
-    .logout-btn:active { background: #dc2626; }
-
-    /* Three-dot menu */
     .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
-    .menu-popup { position: absolute; top: 48px; right: 16px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; }
-    .menu-item { display: block; padding: 12px 20px; color: #4b5563; text-decoration: none; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+    .menu-popup { position: absolute; top: 48px; right: 16px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; min-width: 180px; }
+    .menu-item { padding: 12px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-size: 14px; }
     .menu-item:last-child { border-bottom: none; }
     .menu-item:hover { background: #f9fafb; }
 
-    /* Search */
     #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; flex-direction: column; }
     @media (min-width: 769px) { #searchSection { flex-direction: row; } }
     .search-wrapper { position: relative; flex: 1; }
     #searchInput { width: 100%; padding: 12px 36px 12px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
     #clearSearch { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; display: none; }
 
-    /* Category tabs */
-    #categoryTabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; }
-    #categoryTabs button { background: #e5e7eb; color: #4b5563; border: none; border-radius: 20px; padding: 8px 16px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    #categoryTabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; padding-bottom: 8px; }
+    #categoryTabs button { background: #e5e7eb; color: #4b5563; border: none; border-radius: 20px; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
     #categoryTabs button.active { background: #3b82f6; color: white; }
 
-    /* Empty state */
     .empty-state { text-align: center; padding: 64px 16px; color: #6b7280; background: #f9fafb; border-radius: 12px; margin: 32px 0; }
     .empty-state .icon { font-size: 80px; margin-bottom: 16px; opacity: 0.6; }
-    .empty-state h2 { margin: 0 0 8px; color: #1f2937; font-size: 22px; }
 
-    /* Gage cards */
-    #gaugesList { margin-top: 24px; }
     .gage-item { background: white; margin: 16px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6; overflow: hidden; }
-    .gage-header { padding: 16px; background: #f9fafb; cursor: pointer; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; }
-    .gage-id { font-weight: 600; font-size: 18px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .gage-header { padding: 16px; background: #f9fafb; cursor: pointer; border-bottom: 1px solid #e5e7eb; }
+    .gage-id { font-weight: 600; font-size: 18px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; }
     .gage-status { padding: 8px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; min-width: 90px; text-align: center; }
-    .gage-details { padding: 16px; display: grid; gap: 12px; }
-    @media (min-width: 769px) { .gage-details { grid-template-columns: repeat(3, 1fr); } }
+    .gage-details { padding: 16px; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
     .detail-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
     .gage-actions { padding: 16px; background: #f9fafb; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; border-top: 1px solid #e5e7eb; }
-    .gage-actions button { padding: 8px 16px; min-height: 36px; flex: 1 1 100px; font-weight: 600; border: none; border-radius: 8px; color: white; }
-    .notes-indicator { position: absolute; top: 8px; right: 8px; background: #10b981; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+    .gage-actions button { padding: 8px 16px; min-height: 36px; font-weight: 600; border: none; border-radius: 8px; color: white; cursor: pointer; }
 
-    /* Status colors (softer tones) */
     .status-available { background: #d1fae5; color: #065f46; }
     .status-in-use { background: #fef3c7; color: #92400e; }
     .status-calibration { background: #ede9fe; color: #6d28d9; }
     .status-limit { background: #fee2e2; color: #b91c1c; }
     .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
-
-    /* Buttons in popups */
-    .btn-save { background: #10b981; color: white; }
-    .btn-cancel { background: #9ca3af; color: white; }
-    .btn-confirm { background: #f59e0b; color: white; }
-    .btn-calibration { background: #8b5cf6; color: white; }
-    .btn-return-calibration { background: #eab308; color: white; }
-    .btn-notes { background: #10b981; }
-    .btn-edit { background: #06b6d4; }
-    .btn-delete { background: #ef4444; }
-    .btn-checkout { background: #f59e0b; }
-    .btn-checkin { background: #10b981; }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN SCREEN -->
   <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
       <h2>Employee Login</h2>
@@ -126,7 +95,6 @@
     </div>
   </div>
 
-  <!-- MAIN APP -->
   <div class="container" id="mainApp">
     <div class="employee-info">
       <strong>Logged in as: <span id="currentEmployee"></span></strong>
@@ -134,11 +102,10 @@
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <!-- Menu popup -->
     <div class="menu-popup" id="menuPopup">
-      <div class="menu-item" onclick="exportBackup()">Export Backup</div>
-      <div class="menu-item" onclick="importBackup()">Import Backup</div>
-      <div class="menu-item" onclick="showFullHistory()">View History</div>
+      <button class="menu-item" onclick="exportBackup(); toggleMenu()">Export Backup</button>
+      <button class="menu-item" onclick="importBackup(); toggleMenu()">Import Backup</button>
+      <button class="menu-item" onclick="showFullHistory(); toggleMenu()">View History</button>
     </div>
 
     <h1>Gage Tracker</h1>
@@ -152,21 +119,18 @@
       <button id="searchBtn" onclick="performSearch()">Search</button>
     </div>
 
-    <!-- Category tabs -->
     <div id="categoryTabs">
-      <button class="btn active" onclick="filterByCategory('All')">All</button>
-      <button class="btn" onclick="filterByCategory('Plug Gages')">Plug Gages</button>
-      <button class="btn" onclick="filterByCategory('Ring Gages')">Ring Gages</button>
-      <button class="btn" onclick="filterByCategory('Misc Gages')">Misc Gages</button>
+      <button class="btn active" data-category="All">All</button>
+      <button class="btn" data-category="Plug Gages">Plug Gages</button>
+      <button class="btn" data-category="Ring Gages">Ring Gages</button>
+      <button class="btn" data-category="Misc Gages">Misc Gages</button>
     </div>
 
     <div id="gaugesList"></div>
   </div>
 
-  <!-- FAB -->
   <button class="fab" aria-label="Add new gage">+</button>
 
-  <!-- Hidden import input -->
   <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(this.files[0])">
 
   <script>
@@ -192,54 +156,30 @@
     }
 
     function login() {
-      console.log("login() called");
-      const nameInput = document.getElementById('employeeName');
-      const name = nameInput ? nameInput.value.trim() : '';
-      if (!name) {
-        alert('Please enter your name');
-        return;
-      }
+      const name = document.getElementById('employeeName')?.value.trim();
+      if (!name) return alert('Please enter your name');
       currentEmployee = name;
-      const employeeSpan = document.getElementById('currentEmployee');
-      if (employeeSpan) employeeSpan.textContent = name;
-
-      const overlay = document.getElementById('loginOverlay');
-      const main = document.getElementById('mainApp');
-      if (overlay) overlay.style.display = 'none';
-      if (main) main.style.display = 'block';
-
+      document.getElementById('currentEmployee').textContent = name;
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
       loadGages();
       checkAutoBackup();
-      console.log("Login successful - main app displayed");
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const continueBtn = document.getElementById('continueBtn');
-      if (continueBtn) continueBtn.addEventListener('click', login);
-      const nameInput = document.getElementById('employeeName');
-      if (nameInput) nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
-      const fab = document.querySelector('.fab');
-      if (fab) fab.addEventListener('click', addNewGage);
-      const menuBtn = document.getElementById('menuBtn');
-      if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
-      const categoryTabs = document.getElementById('categoryTabs');
-      if (categoryTabs) categoryTabs.addEventListener('click', e => {
-        if (e.target.tagName === 'BUTTON') {
-          categoryTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
-          currentCategory = e.target.textContent;
+      document.getElementById('continueBtn')?.addEventListener('click', login);
+      document.getElementById('employeeName')?.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+      document.querySelector('.fab')?.addEventListener('click', addNewGage);
+      document.getElementById('menuBtn')?.addEventListener('click', toggleMenu);
+      document.querySelectorAll('#categoryTabs button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#categoryTabs button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
           loadGages(currentSearchTerm);
-        }
+        });
       });
     });
-
-    window.logout = () => {
-      currentEmployee = '';
-      document.getElementById('loginOverlay').style.display = 'flex';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('employeeName').value = '';
-      document.getElementById('gaugesList').innerHTML = '';
-    };
 
     function toggleMenu() {
       const menu = document.getElementById('menuPopup');
@@ -264,8 +204,8 @@
           <label>Last Calibration Date:</label><input type="date" id="newLastCalibrationDate" required>
           <label>Calibration Due Date:</label><input type="date" id="newCalibrationDueDate" required>
           <label>Total Uses Allowed:</label><input type="number" id="newTotalUsesAllowed" value="300" min="1" required>
-          <label>STI Gage?</label><input type="checkbox" id="newIsSTI">
-          <label>Metric Gage?</label><input type="checkbox" id="newIsMetric">
+          <label><input type="checkbox" id="newIsSTI"> STI Gage</label>
+          <label><input type="checkbox" id="newIsMetric"> Metric Gage</label>
           <label>Notes:</label><textarea id="newNotes"></textarea>
           <div class="popup-btn-group">
             <button class="btn-save" onclick="saveNewGage()">Save</button>
@@ -286,15 +226,17 @@
       const isSTI = document.getElementById('newIsSTI').checked;
       const isMetric = document.getElementById('newIsMetric').checked;
       const notes = document.getElementById('newNotes').value.trim();
-      if (!category || !gageId || !size || !lastCalibrationDate || !calibrationDueDate || !totalUsesAllowed) {
+
+      if (!category || !gageId || !size || !lastCalibrationDate || !calibrationDueDate || isNaN(totalUsesAllowed)) {
         alert('Please fill in all required fields');
         return;
       }
+
       gauges.push({
-        category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric,
-        notes, totalUses: 0, inUse: false, usageLimitReached: false
+        category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
+        isSTI, isMetric, notes, totalUses: 0, inUse: false, usageLimitReached: false
       });
-      logAction('Added new gage', { category, gageId, size });
+      logAction('Added new gage', { gageId, category, size });
       saveData();
       alert('New gage added successfully!');
       closePopup();
@@ -307,38 +249,33 @@
       list.innerHTML = '<h3>Gage Catalog</h3>';
       let html = '';
       let foundAny = false;
-      const searchLower = searchTerm.toLowerCase().trim();
+      const lowerSearch = searchTerm.toLowerCase().trim();
 
       gauges.forEach((g, i) => {
         if (currentCategory !== 'All' && g.category !== currentCategory) return;
-        if (searchLower && !g.gageId.toLowerCase().includes(searchLower) && !g.size.toLowerCase().includes(searchLower)) return;
+        if (lowerSearch && !g.gageId.toLowerCase().includes(lowerSearch) && !g.size.toLowerCase().includes(lowerSearch)) return;
         foundAny = true;
-        // Render gage card (add isSTI and isMetric to details)
-        let status = 'AVAILABLE';
-        let statusClass = 'status-available';
-        let checkoutBtn = '';
-        let checkinBtn = '';
-        let calBtn = '';
-        let returnCalBtn = '';
-        let limitWarning = '';
+
+        let status = 'AVAILABLE', statusClass = 'status-available';
+        let checkoutBtn = '', checkinBtn = '', calBtn = '', returnCalBtn = '', limitWarning = '';
         let notesIndicator = g.notes ? '<div class="notes-indicator">N</div>' : '';
+
         if (g.inUse) {
-          status = 'IN USE';
-          statusClass = 'status-in-use';
+          status = 'IN USE'; statusClass = 'status-in-use';
           checkinBtn = `<button class="btn-checkin" onclick="checkinGauge(${i})">Check In</button>`;
         } else if (g.toCalibration) {
-          status = 'CALIBRATION';
-          statusClass = 'status-calibration';
+          status = 'CALIBRATION'; statusClass = 'status-calibration';
           returnCalBtn = `<button class="btn-return-calibration" onclick="returnFromCalibration(${i})">Return from Cal</button>`;
         } else if (g.usageLimitReached) {
-          status = 'LIMIT REACHED';
-          statusClass = 'status-limit';
+          status = 'LIMIT REACHED'; statusClass = 'status-limit';
           limitWarning = `<div class="limit-warning">USAGE LIMIT REACHED</div>`;
         } else {
           checkoutBtn = `<button class="btn-checkout" onclick="checkoutGauge(${i})">Check Out</button>`;
           calBtn = `<button class="btn-calibration" onclick="checkoutToCalibration(${i})">To Calibration</button>`;
         }
-        const remainingUses = g.totalUsesAllowed - (g.totalUses || 0);
+
+        const remaining = g.totalUsesAllowed - (g.totalUses || 0);
+
         html += `
           <div class="gage-item">
             <div class="gage-header" onclick="showGageProfile(${i})">
@@ -349,15 +286,11 @@
               </div>
             </div>
             <div class="gage-details">
-              <div class="detail-item"><div class="detail-label">Category</div><div class="detail-value">${g.category}</div></div>
               <div class="detail-item"><div class="detail-label">Size</div><div class="detail-value">${g.size}</div></div>
-              <div class="detail-item"><div class="detail-label">Cal Date</div><div class="detail-value">${g.lastCalibrationDate}</div></div>
               <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-value">${g.calibrationDueDate}</div></div>
-              <div class="detail-item"><div class="detail-label">STI</div><div class="detail-value">${g.isSTI ? 'Yes' : 'No'}</div></div>
-              <div class="detail-item"><div class="detail-label">Metric</div><div class="detail-value">${g.isMetric ? 'Yes' : 'No'}</div></div>
-              <div class="detail-item"><div class="detail-label">Total Allowed</div><div class="detail-value">${g.totalUsesAllowed}</div></div>
-              <div class="detail-item"><div class="detail-label">Used</div><div class="detail-value">${g.totalUses || 0}</div></div>
-              <div class="detail-item"><div class="detail-label">Remaining</div><div class="detail-value">${remainingUses}</div></div>
+              <div class="detail-item"><div class="detail-label">Remaining Uses</div><div class="detail-value">${remaining}</div></div>
+              ${g.isSTI ? '<div class="detail-item"><div class="detail-label">STI</div><div class="detail-value">Yes</div></div>' : ''}
+              ${g.isMetric ? '<div class="detail-item"><div class="detail-label">Metric</div><div class="detail-value">Yes</div></div>' : ''}
             </div>
             ${limitWarning}
             <div class="gage-actions">
@@ -369,12 +302,13 @@
           </div>
         `;
       });
+
       if (!foundAny) {
         list.innerHTML += `
           <div class="empty-state">
             <div class="icon">🔍</div>
             <h2>No gauges found</h2>
-            <p>Your catalog is empty or no matches for the search.<br>Use the + button below to add a gage.</p>
+            <p>Use the + button below to add a gage.</p>
           </div>
         `;
       } else {
@@ -382,11 +316,138 @@
       }
     }
 
-    window.searchGages = (term) => loadGages(term);
+    function showGageProfile(i) {
+      const g = gauges[i];
+      const remaining = g.totalUsesAllowed - (g.totalUses || 0);
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <h3>Gage Profile: ${g.gageId}</h3>
+          <p><strong>Category:</strong> ${g.category}</p>
+          <p><strong>Size:</strong> ${g.size}</p>
+          <p><strong>Calibration Due:</strong> ${g.calibrationDueDate}</p>
+          <p><strong>Remaining Uses:</strong> ${remaining}</p>
+          ${g.isSTI ? '<p><strong>STI Gage:</strong> Yes</p>' : ''}
+          ${g.isMetric ? '<p><strong>Metric Gage:</strong> Yes</p>' : ''}
+          <button class="btn-cancel" onclick="closePopup()">Close</button>
+        </div>
+      `;
+      document.body.appendChild(popup);
+    }
+
+    // Backup functions (export/import)
+    function exportBackup() {
+      const data = {
+        gauges,
+        historyLog,
+        timestamp: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gage-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('Backup exported successfully!');
+    }
+
+    function importBackup() {
+      if (confirm('This will overwrite current data. Continue?')) {
+        document.getElementById('importFile').click();
+      }
+    }
+
+    function handleImport(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+          gauges = data.gauges || [];
+          historyLog = data.historyLog || [];
+          saveData();
+          loadGages();
+          alert('Backup imported successfully!');
+        } catch (err) {
+          alert('Invalid backup file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function checkAutoBackup() {
+      const last = localStorage.getItem('lastBackup');
+      if (!last || Date.now() - new Date(last) > 86400000) {
+        if (confirm('It has been over 24 hours since last backup. Export now?')) {
+          exportBackup();
+          localStorage.setItem('lastBackup', new Date().toISOString());
+        }
+      }
+    }
+
+    // History popup
+    function showFullHistory() {
+      let html = '';
+      historyLog.slice().reverse().forEach(entry => {
+        html += `
+          <div style="margin:12px 0; padding:12px; background:#f9fafb; border-radius:8px; border:1px solid #e5e7eb;">
+            <strong>${entry.timestamp} - ${entry.employee}</strong>: ${entry.action}<br>
+            <pre style="margin:8px 0 0; white-space:pre-wrap; font-size:13px;">${JSON.stringify(entry.details, null, 2)}</pre>
+          </div>
+        `;
+      });
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <button class="btn-cancel" onclick="closePopup()" style="position:sticky; top:8px; float:right;">Close</button>
+          <h3>Full Action History</h3>
+          <div style="max-height:70vh; overflow-y:auto;">
+            ${html || '<p style="text-align:center; color:#6b7280;">No history yet.</p>'}
+          </div>
+          <button class="btn-save" onclick="exportHistory()" style="margin-top:16px;">Export History as Text</button>
+        </div>
+      `;
+      document.body.appendChild(popup);
+    }
+
+    function exportHistory() {
+      if (historyLog.length === 0) return alert("No history to export.");
+      let text = "Gage Tracker History Log\nExported: " + new Date().toLocaleString() + "\n\n";
+      historyLog.slice().reverse().forEach(entry => {
+        text += `Date: ${entry.timestamp}\nEmployee: ${entry.employee}\nAction: ${entry.action}\n`;
+        if (entry.details) {
+          text += "Details:\n";
+          Object.entries(entry.details).forEach(([k, v]) => text += `  ${k}: ${v}\n`);
+        }
+        text += "----------------------------------------\n\n";
+      });
+      const blob = new Blob([text], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gage-history-${new Date().toISOString().split('T')[0]}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('History exported as readable text file!');
+    }
+
+    // Close popup helper
+    function closePopup() {
+      document.querySelectorAll('.popup-overlay').forEach(el => el.remove());
+    }
+
+    // Search functions
+    function searchGages(term) {
+      loadGages(term);
+    }
 
     function performSearch() {
-      const term = document.getElementById('searchInput').value.trim();
-      loadGages(term);
+      loadGages(document.getElementById('searchInput').value.trim());
     }
 
     function clearSearch() {
@@ -394,23 +455,6 @@
       document.getElementById('clearSearch').style.display = 'none';
       loadGages('');
     }
-
-    document.getElementById('searchInput').addEventListener('input', function() {
-      document.getElementById('clearSearch').style.display = this.value.trim() ? 'block' : 'none';
-    });
-
-    function filterByCategory(category) {
-      currentCategory = category;
-      loadGages(currentSearchTerm);
-    }
-
-    // Backup, history, and other functions remain as before
-
-    window.closePopup = () => {
-      document.querySelectorAll('.popup-overlay').forEach(p => p.remove());
-    };
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 
     // Initial load
     loadGages();
