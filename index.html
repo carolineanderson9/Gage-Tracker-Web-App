@@ -71,6 +71,11 @@
     #searchInput { width: 100%; padding: 12px 36px 12px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
     #clearSearch { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; display: none; }
 
+    /* Category tabs */
+    #categoryTabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; }
+    #categoryTabs button { background: #e5e7eb; color: #4b5563; border: none; border-radius: 20px; padding: 8px 16px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    #categoryTabs button.active { background: #3b82f6; color: white; }
+
     /* Empty state */
     .empty-state { text-align: center; padding: 64px 16px; color: #6b7280; background: #f9fafb; border-radius: 12px; margin: 32px 0; }
     .empty-state .icon { font-size: 80px; margin-bottom: 16px; opacity: 0.6; }
@@ -87,6 +92,7 @@
     .detail-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
     .gage-actions { padding: 16px; background: #f9fafb; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; border-top: 1px solid #e5e7eb; }
     .gage-actions button { padding: 8px 16px; min-height: 36px; flex: 1 1 100px; font-weight: 600; border: none; border-radius: 8px; color: white; }
+    .notes-indicator { position: absolute; top: 8px; right: 8px; background: #10b981; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
 
     /* Status colors (softer tones) */
     .status-available { background: #d1fae5; color: #065f46; }
@@ -94,7 +100,6 @@
     .status-calibration { background: #ede9fe; color: #6d28d9; }
     .status-limit { background: #fee2e2; color: #b91c1c; }
     .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
-    .notes-indicator { position: absolute; top: 8px; right: 8px; background: #10b981; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; }
 
     /* Buttons in popups */
     .btn-save { background: #10b981; color: white; }
@@ -147,9 +152,9 @@
       <button id="searchBtn" onclick="performSearch()">Search</button>
     </div>
 
-    <!-- Category tabs (for grouping) -->
-    <div id="categoryTabs" style="display: flex; gap: 8px; margin: 16px 0; overflow-x: auto;">
-      <button class="btn" onclick="filterByCategory('All')">All</button>
+    <!-- Category tabs -->
+    <div id="categoryTabs">
+      <button class="btn active" onclick="filterByCategory('All')">All</button>
       <button class="btn" onclick="filterByCategory('Plug Gages')">Plug Gages</button>
       <button class="btn" onclick="filterByCategory('Ring Gages')">Ring Gages</button>
       <button class="btn" onclick="filterByCategory('Misc Gages')">Misc Gages</button>
@@ -168,7 +173,8 @@
     let gauges = JSON.parse(localStorage.getItem('gauges') || '[]');
     let historyLog = JSON.parse(localStorage.getItem('historyLog') || '[]');
     let currentEmployee = '';
-    let currentCategory = 'All'; // For grouping
+    let currentCategory = 'All';
+    let currentSearchTerm = '';
 
     function saveData() {
       localStorage.setItem('gauges', JSON.stringify(gauges));
@@ -207,7 +213,6 @@
       console.log("Login successful - main app displayed");
     }
 
-    // Attach listeners
     document.addEventListener('DOMContentLoaded', () => {
       const continueBtn = document.getElementById('continueBtn');
       if (continueBtn) continueBtn.addEventListener('click', login);
@@ -217,12 +222,16 @@
       if (fab) fab.addEventListener('click', addNewGage);
       const menuBtn = document.getElementById('menuBtn');
       if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
+      const categoryTabs = document.getElementById('categoryTabs');
+      if (categoryTabs) categoryTabs.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+          categoryTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentCategory = e.target.textContent;
+          loadGages(currentSearchTerm);
+        }
+      });
     });
-
-    function toggleMenu() {
-      const menu = document.getElementById('menuPopup');
-      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-    }
 
     window.logout = () => {
       currentEmployee = '';
@@ -232,8 +241,12 @@
       document.getElementById('gaugesList').innerHTML = '';
     };
 
-    // Add/Edit gage with category
-    window.addNewGage = () => {
+    function toggleMenu() {
+      const menu = document.getElementById('menuPopup');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function addNewGage() {
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
       popup.style.display = 'flex';
@@ -247,11 +260,12 @@
             <option>Misc Gages</option>
           </select>
           <label>Gage ID:</label><input type="text" id="newGageId" required>
-          <label>Gage Type:</label><input type="text" id="newGageType" required>
           <label>Size:</label><input type="text" id="newSize" required>
           <label>Last Calibration Date:</label><input type="date" id="newLastCalibrationDate" required>
           <label>Calibration Due Date:</label><input type="date" id="newCalibrationDueDate" required>
           <label>Total Uses Allowed:</label><input type="number" id="newTotalUsesAllowed" value="300" min="1" required>
+          <label>STI Gage?</label><input type="checkbox" id="newIsSTI">
+          <label>Metric Gage?</label><input type="checkbox" id="newIsMetric">
           <label>Notes:</label><textarea id="newNotes"></textarea>
           <div class="popup-btn-group">
             <button class="btn-save" onclick="saveNewGage()">Save</button>
@@ -260,37 +274,143 @@
         </div>
       `;
       document.body.appendChild(popup);
-    };
+    }
 
-    window.saveNewGage = () => {
+    function saveNewGage() {
       const category = document.getElementById('newCategory').value;
       const gageId = document.getElementById('newGageId').value.trim();
-      const gageType = document.getElementById('newGageType').value.trim();
       const size = document.getElementById('newSize').value.trim();
       const lastCalibrationDate = document.getElementById('newLastCalibrationDate').value;
       const calibrationDueDate = document.getElementById('newCalibrationDueDate').value;
       const totalUsesAllowed = parseInt(document.getElementById('newTotalUsesAllowed').value);
+      const isSTI = document.getElementById('newIsSTI').checked;
+      const isMetric = document.getElementById('newIsMetric').checked;
       const notes = document.getElementById('newNotes').value.trim();
-      if (!category || !gageId || !gageType || !size || !lastCalibrationDate || !calibrationDueDate || !totalUsesAllowed) {
+      if (!category || !gageId || !size || !lastCalibrationDate || !calibrationDueDate || !totalUsesAllowed) {
         alert('Please fill in all required fields');
         return;
       }
       gauges.push({
-        category, gageId, gageType, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
+        category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric,
         notes, totalUses: 0, inUse: false, usageLimitReached: false
       });
-      logAction('Added new gage', { category, gageId, gageType, size });
+      logAction('Added new gage', { category, gageId, size });
       saveData();
-      alert('New gage added!');
+      alert('New gage added successfully!');
       closePopup();
-      loadGages();
-    };
+      loadGages(currentSearchTerm);
+    }
 
-    // (Add similar category field to editGage/saveEdit, checkoutGauge/confirmCheckout without part, etc. - merged from your original)
+    function loadGages(searchTerm = '') {
+      currentSearchTerm = searchTerm;
+      const list = document.getElementById('gaugesList');
+      list.innerHTML = '<h3>Gage Catalog</h3>';
+      let html = '';
+      let foundAny = false;
+      const searchLower = searchTerm.toLowerCase().trim();
+
+      gauges.forEach((g, i) => {
+        if (currentCategory !== 'All' && g.category !== currentCategory) return;
+        if (searchLower && !g.gageId.toLowerCase().includes(searchLower) && !g.size.toLowerCase().includes(searchLower)) return;
+        foundAny = true;
+        // Render gage card (add isSTI and isMetric to details)
+        let status = 'AVAILABLE';
+        let statusClass = 'status-available';
+        let checkoutBtn = '';
+        let checkinBtn = '';
+        let calBtn = '';
+        let returnCalBtn = '';
+        let limitWarning = '';
+        let notesIndicator = g.notes ? '<div class="notes-indicator">N</div>' : '';
+        if (g.inUse) {
+          status = 'IN USE';
+          statusClass = 'status-in-use';
+          checkinBtn = `<button class="btn-checkin" onclick="checkinGauge(${i})">Check In</button>`;
+        } else if (g.toCalibration) {
+          status = 'CALIBRATION';
+          statusClass = 'status-calibration';
+          returnCalBtn = `<button class="btn-return-calibration" onclick="returnFromCalibration(${i})">Return from Cal</button>`;
+        } else if (g.usageLimitReached) {
+          status = 'LIMIT REACHED';
+          statusClass = 'status-limit';
+          limitWarning = `<div class="limit-warning">USAGE LIMIT REACHED</div>`;
+        } else {
+          checkoutBtn = `<button class="btn-checkout" onclick="checkoutGauge(${i})">Check Out</button>`;
+          calBtn = `<button class="btn-calibration" onclick="checkoutToCalibration(${i})">To Calibration</button>`;
+        }
+        const remainingUses = g.totalUsesAllowed - (g.totalUses || 0);
+        html += `
+          <div class="gage-item">
+            <div class="gage-header" onclick="showGageProfile(${i})">
+              <div class="gage-id">
+                <span>${g.gageId}</span>
+                <span class="gage-status ${statusClass}">${status}</span>
+                ${notesIndicator}
+              </div>
+            </div>
+            <div class="gage-details">
+              <div class="detail-item"><div class="detail-label">Category</div><div class="detail-value">${g.category}</div></div>
+              <div class="detail-item"><div class="detail-label">Size</div><div class="detail-value">${g.size}</div></div>
+              <div class="detail-item"><div class="detail-label">Cal Date</div><div class="detail-value">${g.lastCalibrationDate}</div></div>
+              <div class="detail-item"><div class="detail-label">Due Date</div><div class="detail-value">${g.calibrationDueDate}</div></div>
+              <div class="detail-item"><div class="detail-label">STI</div><div class="detail-value">${g.isSTI ? 'Yes' : 'No'}</div></div>
+              <div class="detail-item"><div class="detail-label">Metric</div><div class="detail-value">${g.isMetric ? 'Yes' : 'No'}</div></div>
+              <div class="detail-item"><div class="detail-label">Total Allowed</div><div class="detail-value">${g.totalUsesAllowed}</div></div>
+              <div class="detail-item"><div class="detail-label">Used</div><div class="detail-value">${g.totalUses || 0}</div></div>
+              <div class="detail-item"><div class="detail-label">Remaining</div><div class="detail-value">${remainingUses}</div></div>
+            </div>
+            ${limitWarning}
+            <div class="gage-actions">
+              ${checkoutBtn}${calBtn}${checkinBtn}${returnCalBtn}
+              <button class="btn-notes" onclick="editNotes(${i}); event.stopPropagation();">Notes</button>
+              <button class="btn-edit" onclick="editGage(${i}); event.stopPropagation();">Edit</button>
+              <button class="btn-delete" onclick="deleteGage(${i}); event.stopPropagation();">Remove</button>
+            </div>
+          </div>
+        `;
+      });
+      if (!foundAny) {
+        list.innerHTML += `
+          <div class="empty-state">
+            <div class="icon">🔍</div>
+            <h2>No gauges found</h2>
+            <p>Your catalog is empty or no matches for the search.<br>Use the + button below to add a gage.</p>
+          </div>
+        `;
+      } else {
+        list.innerHTML += html;
+      }
+    }
+
+    window.searchGages = (term) => loadGages(term);
+
+    function performSearch() {
+      const term = document.getElementById('searchInput').value.trim();
+      loadGages(term);
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('clearSearch').style.display = 'none';
+      loadGages('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+      document.getElementById('clearSearch').style.display = this.value.trim() ? 'block' : 'none';
+    });
+
+    function filterByCategory(category) {
+      currentCategory = category;
+      loadGages(currentSearchTerm);
+    }
+
+    // Backup, history, and other functions remain as before
 
     window.closePopup = () => {
       document.querySelectorAll('.popup-overlay').forEach(p => p.remove());
     };
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 
     // Initial load
     loadGages();
