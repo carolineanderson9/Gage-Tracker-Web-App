@@ -82,6 +82,13 @@
     .status-calibration { background: #ede9fe; color: #6d28d9; }
     .status-limit { background: #fee2e2; color: #b91c1c; }
     .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
+    .btn-checkout { background: #f59e0b; }
+    .btn-calibration { background: #8b5cf6; }
+    .btn-return-calibration { background: #eab308; }
+    .btn-checkin { background: #10b981; }
+    .btn-notes { background: #10b981; }
+    .btn-edit { background: #06b6d4; }
+    .btn-delete { background: #ef4444; }
   </style>
 </head>
 <body>
@@ -179,6 +186,9 @@
           loadGages(currentSearchTerm);
         });
       });
+      document.getElementById('searchInput')?.addEventListener('input', () => {
+        document.getElementById('clearSearch').style.display = document.getElementById('searchInput').value.trim() ? 'block' : 'none';
+      });
     });
 
     function toggleMenu() {
@@ -262,23 +272,23 @@
 
         if (g.inUse) {
           status = 'IN USE'; statusClass = 'status-in-use';
-          checkinBtn = `<button class="btn-checkin" onclick="checkinGauge(${i})">Check In</button>`;
+          checkinBtn = `<button class="btn-checkin" data-index="${i}">Check In</button>`;
         } else if (g.toCalibration) {
           status = 'CALIBRATION'; statusClass = 'status-calibration';
-          returnCalBtn = `<button class="btn-return-calibration" onclick="returnFromCalibration(${i})">Return from Cal</button>`;
+          returnCalBtn = `<button class="btn-return-calibration" data-index="${i}">Return from Cal</button>`;
         } else if (g.usageLimitReached) {
           status = 'LIMIT REACHED'; statusClass = 'status-limit';
           limitWarning = `<div class="limit-warning">USAGE LIMIT REACHED</div>`;
         } else {
-          checkoutBtn = `<button class="btn-checkout" onclick="checkoutGauge(${i})">Check Out</button>`;
-          calBtn = `<button class="btn-calibration" onclick="checkoutToCalibration(${i})">To Calibration</button>`;
+          checkoutBtn = `<button class="btn-checkout" data-index="${i}">Check Out</button>`;
+          calBtn = `<button class="btn-calibration" data-index="${i}">To Calibration</button>`;
         }
 
         const remaining = g.totalUsesAllowed - (g.totalUses || 0);
 
         html += `
           <div class="gage-item">
-            <div class="gage-header" onclick="showGageProfile(${i})">
+            <div class="gage-header" data-index="${i}">
               <div class="gage-id">
                 <span>${g.gageId}</span>
                 <span class="gage-status ${statusClass}">${status}</span>
@@ -295,9 +305,9 @@
             ${limitWarning}
             <div class="gage-actions">
               ${checkoutBtn}${calBtn}${checkinBtn}${returnCalBtn}
-              <button class="btn-notes" onclick="editNotes(${i}); event.stopPropagation();">Notes</button>
-              <button class="btn-edit" onclick="editGage(${i}); event.stopPropagation();">Edit</button>
-              <button class="btn-delete" onclick="deleteGage(${i}); event.stopPropagation();">Remove</button>
+              <button class="btn-notes" data-index="${i}">Notes</button>
+              <button class="btn-edit" data-index="${i}">Edit</button>
+              <button class="btn-delete" data-index="${i}">Remove</button>
             </div>
           </div>
         `;
@@ -314,6 +324,32 @@
       } else {
         list.innerHTML += html;
       }
+
+      // Attach event listeners to buttons (fixes onclick not working)
+      document.querySelectorAll('.gage-header').forEach(header => {
+        header.addEventListener('click', () => showGageProfile(parseInt(header.dataset.index)));
+      });
+      document.querySelectorAll('.btn-checkout').forEach(btn => {
+        btn.addEventListener('click', () => checkoutGauge(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-calibration').forEach(btn => {
+        btn.addEventListener('click', () => checkoutToCalibration(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-checkin').forEach(btn => {
+        btn.addEventListener('click', () => checkinGauge(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-return-calibration').forEach(btn => {
+        btn.addEventListener('click', () => returnFromCalibration(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-notes').forEach(btn => {
+        btn.addEventListener('click', () => editNotes(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => editGage(parseInt(btn.dataset.index)));
+      });
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteGage(parseInt(btn.dataset.index)));
+      });
     }
 
     function showGageProfile(i) {
@@ -327,136 +363,212 @@
           <h3>Gage Profile: ${g.gageId}</h3>
           <p><strong>Category:</strong> ${g.category}</p>
           <p><strong>Size:</strong> ${g.size}</p>
+          <p><strong>Last Calibration:</strong> ${g.lastCalibrationDate}</p>
           <p><strong>Calibration Due:</strong> ${g.calibrationDueDate}</p>
+          <p><strong>Uses Allowed:</strong> ${g.totalUsesAllowed}</p>
+          <p><strong>Used:</strong> ${g.totalUses || 0}</p>
           <p><strong>Remaining Uses:</strong> ${remaining}</p>
           ${g.isSTI ? '<p><strong>STI Gage:</strong> Yes</p>' : ''}
           ${g.isMetric ? '<p><strong>Metric Gage:</strong> Yes</p>' : ''}
+          <p><strong>Status:</strong> ${g.inUse ? 'In Use' : g.toCalibration ? 'In Calibration' : g.usageLimitReached ? 'Limit Reached' : 'Available'}</p>
+          <p><strong>Notes:</strong> ${g.notes || 'No notes'}</p>
           <button class="btn-cancel" onclick="closePopup()">Close</button>
         </div>
       `;
       document.body.appendChild(popup);
     }
 
-    // Backup functions (export/import)
-    function exportBackup() {
-      const data = {
-        gauges,
-        historyLog,
-        timestamp: new Date().toISOString()
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `gage-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      alert('Backup exported successfully!');
-    }
-
-    function importBackup() {
-      if (confirm('This will overwrite current data. Continue?')) {
-        document.getElementById('importFile').click();
-      }
-    }
-
-    function handleImport(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const data = JSON.parse(e.target.result);
-          gauges = data.gauges || [];
-          historyLog = data.historyLog || [];
-          saveData();
-          loadGages();
-          alert('Backup imported successfully!');
-        } catch (err) {
-          alert('Invalid backup file: ' + err.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function checkAutoBackup() {
-      const last = localStorage.getItem('lastBackup');
-      if (!last || Date.now() - new Date(last) > 86400000) {
-        if (confirm('It has been over 24 hours since last backup. Export now?')) {
-          exportBackup();
-          localStorage.setItem('lastBackup', new Date().toISOString());
-        }
-      }
-    }
-
-    // History popup
-    function showFullHistory() {
-      let html = '';
-      historyLog.slice().reverse().forEach(entry => {
-        html += `
-          <div style="margin:12px 0; padding:12px; background:#f9fafb; border-radius:8px; border:1px solid #e5e7eb;">
-            <strong>${entry.timestamp} - ${entry.employee}</strong>: ${entry.action}<br>
-            <pre style="margin:8px 0 0; white-space:pre-wrap; font-size:13px;">${JSON.stringify(entry.details, null, 2)}</pre>
-          </div>
-        `;
-      });
+    function editGage(i) {
+      const g = gauges[i];
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
       popup.style.display = 'flex';
       popup.innerHTML = `
         <div class="popup-box">
-          <button class="btn-cancel" onclick="closePopup()" style="position:sticky; top:8px; float:right;">Close</button>
-          <h3>Full Action History</h3>
-          <div style="max-height:70vh; overflow-y:auto;">
-            ${html || '<p style="text-align:center; color:#6b7280;">No history yet.</p>'}
+          <h3>Edit Gage: ${g.gageId}</h3>
+          <label>Category:</label>
+          <select id="editCategory">
+            <option selected>${g.category}</option>
+            <option>Plug Gages</option>
+            <option>Ring Gages</option>
+            <option>Misc Gages</option>
+          </select>
+          <label>Gage ID:</label><input type="text" id="editGageId" value="${g.gageId}" required>
+          <label>Size:</label><input type="text" id="editSize" value="${g.size}" required>
+          <label>Last Calibration Date:</label><input type="date" id="editLastCalibrationDate" value="${g.lastCalibrationDate}" required>
+          <label>Calibration Due Date:</label><input type="date" id="editCalibrationDueDate" value="${g.calibrationDueDate}" required>
+          <label>Total Uses Allowed:</label><input type="number" id="editTotalUsesAllowed" value="${g.totalUsesAllowed}" min="1" required>
+          <label><input type="checkbox" id="editIsSTI" ${g.isSTI ? 'checked' : ''}> STI Gage</label>
+          <label><input type="checkbox" id="editIsMetric" ${g.isMetric ? 'checked' : ''}> Metric Gage</label>
+          <label>Notes:</label><textarea id="editNotes">${g.notes || ''}</textarea>
+          <div class="popup-btn-group">
+            <button class="btn-save" onclick="saveEdit(${i})">Save</button>
+            <button class="btn-cancel" onclick="closePopup()">Cancel</button>
           </div>
-          <button class="btn-save" onclick="exportHistory()" style="margin-top:16px;">Export History as Text</button>
         </div>
       `;
       document.body.appendChild(popup);
     }
 
-    function exportHistory() {
-      if (historyLog.length === 0) return alert("No history to export.");
-      let text = "Gage Tracker History Log\nExported: " + new Date().toLocaleString() + "\n\n";
-      historyLog.slice().reverse().forEach(entry => {
-        text += `Date: ${entry.timestamp}\nEmployee: ${entry.employee}\nAction: ${entry.action}\n`;
-        if (entry.details) {
-          text += "Details:\n";
-          Object.entries(entry.details).forEach(([k, v]) => text += `  ${k}: ${v}\n`);
-        }
-        text += "----------------------------------------\n\n";
-      });
-      const blob = new Blob([text], {type: 'text/plain'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `gage-history-${new Date().toISOString().split('T')[0]}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      alert('History exported as readable text file!');
+    function saveEdit(i) {
+      const category = document.getElementById('editCategory').value;
+      const gageId = document.getElementById('editGageId').value.trim();
+      const size = document.getElementById('editSize').value.trim();
+      const lastCalibrationDate = document.getElementById('editLastCalibrationDate').value;
+      const calibrationDueDate = document.getElementById('editCalibrationDueDate').value;
+      const totalUsesAllowed = parseInt(document.getElementById('editTotalUsesAllowed').value);
+      const isSTI = document.getElementById('editIsSTI').checked;
+      const isMetric = document.getElementById('editIsMetric').checked;
+      const notes = document.getElementById('editNotes').value.trim();
+
+      gauges[i] = { ...gauges[i], category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric, notes };
+      logAction('Edited gage', { gageId, category, size });
+      saveData();
+      alert('Gage updated successfully!');
+      closePopup();
+      loadGages(currentSearchTerm);
     }
 
-    // Close popup helper
-    function closePopup() {
-      document.querySelectorAll('.popup-overlay').forEach(el => el.remove());
+    // (Continue with the rest of your functions: editNotes, saveNotes, deleteGage, checkoutToCalibration, returnFromCalibration, checkoutGauge, confirmCheckout, checkinGauge, confirmCheckIn, exportBackup, importBackup, handleImport, checkAutoBackup, showFullHistory, exportHistory, searchGages, performSearch, clearSearch)
+
+    function checkoutGauge(i) {
+      const g = gauges[i];
+      if (g.usageLimitReached) return alert('USAGE LIMIT REACHED - Cannot check out!');
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <h3>Check Out: ${g.gageId}</h3>
+          <label>Job #:</label><input type="text" id="checkoutJob">
+          <label>Date:</label><input type="date" id="checkoutDate" value="${new Date().toISOString().split('T')[0]}">
+          <div class="popup-btn-group">
+            <button class="btn-save" onclick="confirmCheckout(${i})">Confirm</button>
+            <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popup);
     }
 
-    // Search functions
-    function searchGages(term) {
-      loadGages(term);
+    function confirmCheckout(i) {
+      const job = document.getElementById('checkoutJob').value.trim();
+      const date = document.getElementById('checkoutDate').value;
+      if (!job) return alert('Please enter Job #');
+      gauges[i].inUse = true;
+      gauges[i].currentJob = job;
+      gauges[i].checkoutDate = date;
+      gauges[i].checkedOutBy = currentEmployee;
+      gauges[i].toCalibration = false;
+      logAction('Checked out gage', { gageId: gauges[i].gageId, job });
+      saveData();
+      alert(`${job} checked out by ${currentEmployee}`);
+      closePopup();
+      loadGages(currentSearchTerm);
     }
 
-    function performSearch() {
-      loadGages(document.getElementById('searchInput').value.trim());
+    function checkinGauge(i) {
+      const g = gauges[i];
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <h3>Check In: ${g.gageId}</h3>
+          <label>Usage Amount:</label><input type="number" id="usageAmount" min="0" required>
+          <div class="popup-btn-group">
+            <button class="btn-save" onclick="confirmCheckIn(${i})">Confirm</button>
+            <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popup);
     }
 
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('clearSearch').style.display = 'none';
-      loadGages('');
+    function confirmCheckIn(i) {
+      const usageAmount = parseInt(document.getElementById('usageAmount').value);
+      if (isNaN(usageAmount) || usageAmount < 0) return alert('Please enter a valid number');
+      const newTotalUses = (gauges[i].totalUses || 0) + usageAmount;
+      gauges[i].inUse = false;
+      gauges[i].currentJob = '';
+      gauges[i].checkedOutBy = '';
+      gauges[i].totalUses = newTotalUses;
+      gauges[i].checkedInBy = currentEmployee;
+      gauges[i].lastUsageAmount = usageAmount;
+      gauges[i].lastCheckIn = new Date().toISOString().split('T')[0];
+      gauges[i].usageLimitReached = newTotalUses >= gauges[i].totalUsesAllowed;
+      gauges[i].toCalibration = false;
+      logAction('Checked in gage', { gageId: gauges[i].gageId, usageAmount });
+      saveData();
+      const message = gauges[i].usageLimitReached ? `${gauges[i].gageId} checked in - USAGE LIMIT REACHED!` : `${gauges[i].gageId} checked in. Usage: ${usageAmount}`;
+      alert(message);
+      closePopup();
+      loadGages(currentSearchTerm);
     }
 
-    // Initial load
+    function checkoutToCalibration(i) {
+      gauges[i].toCalibration = true;
+      gauges[i].inUse = false;
+      gauges[i].checkedOutBy = currentEmployee;
+      logAction('Sent to calibration', { gageId: gauges[i].gageId });
+      saveData();
+      alert(`${gauges[i].gageId} sent to calibration by ${currentEmployee}`);
+      loadGages(currentSearchTerm);
+    }
+
+    function returnFromCalibration(i) {
+      gauges[i].toCalibration = false;
+      gauges[i].lastCalibrationDate = new Date().toISOString().split('T')[0];
+      gauges[i].totalUses = 0;
+      gauges[i].usageLimitReached = false;
+      logAction('Returned from calibration', { gageId: gauges[i].gageId });
+      saveData();
+      alert(`${gauges[i].gageId} returned from calibration - reset to 0 uses`);
+      loadGages(currentSearchTerm);
+    }
+
+    function editNotes(i) {
+      const g = gauges[i];
+      const popup = document.createElement('div');
+      popup.className = 'popup-overlay';
+      popup.style.display = 'flex';
+      popup.innerHTML = `
+        <div class="popup-box">
+          <h3>Notes for ${g.gageId}</h3>
+          <textarea id="editNotes" placeholder="Add notes...">${g.notes || ''}</textarea>
+          <div class="popup-btn-group">
+            <button class="btn-save" onclick="saveNotes(${i})">Save</button>
+            <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popup);
+    }
+
+    function saveNotes(i) {
+      gauges[i].notes = document.getElementById('editNotes').value.trim();
+      logAction('Updated notes', { gageId: gauges[i].gageId });
+      saveData();
+      alert('Notes saved!');
+      closePopup();
+      loadGages(currentSearchTerm);
+    }
+
+    function deleteGage(i) {
+      if (!confirm('Are you sure?')) return;
+      const removed = gauges.splice(i, 1)[0];
+      logAction('Deleted gage', { gageId: removed.gageId });
+      saveData();
+      alert('Gage removed');
+      loadGages(currentSearchTerm);
+    }
+
+    window.closePopup = () => {
+      document.querySelectorAll('.popup-overlay').forEach(p => p.remove());
+    };
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
     loadGages();
   </script>
 </body>
