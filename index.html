@@ -77,19 +77,27 @@
     .gage-actions { padding: 16px; background: #f9fafb; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; border-top: 1px solid #e5e7eb; }
     .gage-actions button { padding: 8px 16px; min-height: 36px; font-weight: 600; border: none; border-radius: 8px; color: white; cursor: pointer; }
 
+    /* Button colors - distinct */
+    .btn-checkout { background: #f59e0b; }
+    .btn-calibration { background: #8b5cf6; }
+    .btn-return-calibration { background: #eab308; }
+    .btn-checkin { background: #10b981; } /* Distinct green for check-in */
+    .btn-notes { background: #34d399; } /* Lighter green for notes */
+    .btn-edit { background: #06b6d4; }
+    .btn-delete { background: #ef4444; }
+
     .status-available { background: #d1fae5; color: #065f46; }
     .status-in-use { background: #fef3c7; color: #92400e; }
     .status-calibration { background: #ede9fe; color: #6d28d9; }
     .status-limit { background: #fee2e2; color: #b91c1c; }
     .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
 
-    .btn-checkout { background: #f59e0b; }
-    .btn-calibration { background: #8b5cf6; }
-    .btn-return-calibration { background: #eab308; }
-    .btn-checkin { background: #10b981; }
-    .btn-notes { background: #10b981; }
-    .btn-edit { background: #06b6d4; }
-    .btn-delete { background: #ef4444; }
+    /* Improved profile info layout */
+    .profile-info { display: grid; gap: 16px; margin: 16px 0; }
+    .profile-row { display: flex; justify-content: space-between; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .profile-label { font-weight: 600; color: #4b5563; }
+    .profile-value { font-weight: 500; color: #1f2937; text-align: right; }
+    .profile-notes { margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -363,23 +371,72 @@
       popup.innerHTML = `
         <div class="popup-box">
           <h3>Gage Profile: ${g.gageId}</h3>
-          <p><strong>Category:</strong> ${g.category}</p>
-          <p><strong>Size:</strong> ${g.size}</p>
-          <p><strong>Last Calibration:</strong> ${g.lastCalibrationDate}</p>
-          <p><strong>Calibration Due:</strong> ${g.calibrationDueDate}</p>
-          <p><strong>Uses Allowed:</strong> ${g.totalUsesAllowed}</p>
-          <p><strong>Used:</strong> ${g.totalUses || 0}</p>
-          <p><strong>Remaining Uses:</strong> ${remaining}</p>
-          ${g.isSTI ? '<p><strong>STI Gage:</strong> Yes</p>' : ''}
-          ${g.isMetric ? '<p><strong>Metric Gage:</strong> Yes</p>' : ''}
-          <p><strong>Status:</strong> ${g.inUse ? 'In Use' : g.toCalibration ? 'In Calibration' : g.usageLimitReached ? 'Limit Reached' : 'Available'}</p>
-          ${g.inUse && g.checkedOutBy ? `<p><strong>Checked Out By:</strong> ${g.checkedOutBy}</p>` : ''}
-          <p><strong>Notes:</strong> ${g.notes || 'No notes'}</p>
+          <div class="profile-info">
+            <div class="profile-row">
+              <span class="profile-label">Category</span>
+              <span class="profile-value">${g.category}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Size</span>
+              <span class="profile-value">${g.size}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Last Calibration</span>
+              <span class="profile-value">${g.lastCalibrationDate || 'N/A'}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Calibration Due</span>
+              <span class="profile-value">${g.calibrationDueDate}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Uses Allowed</span>
+              <span class="profile-value">${g.totalUsesAllowed}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Used</span>
+              <span class="profile-value">${g.totalUses || 0}</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Remaining Uses</span>
+              <span class="profile-value">${remaining}</span>
+            </div>
+            ${g.isSTI ? `
+              <div class="profile-row">
+                <span class="profile-label">STI Gage</span>
+                <span class="profile-value">Yes</span>
+              </div>
+            ` : ''}
+            ${g.isMetric ? `
+              <div class="profile-row">
+                <span class="profile-label">Metric Gage</span>
+                <span class="profile-value">Yes</span>
+              </div>
+            ` : ''}
+            <div class="profile-row">
+              <span class="profile-label">Status</span>
+              <span class="profile-value ${g.inUse ? 'status-in-use' : g.toCalibration ? 'status-calibration' : g.usageLimitReached ? 'status-limit' : 'status-available'}">
+                ${g.inUse ? 'In Use' : g.toCalibration ? 'In Calibration' : g.usageLimitReached ? 'Limit Reached' : 'Available'}
+              </span>
+            </div>
+            ${g.inUse && g.checkedOutBy ? `
+              <div class="profile-row">
+                <span class="profile-label">Checked Out By</span>
+                <span class="profile-value">${g.checkedOutBy}</span>
+              </div>
+            ` : ''}
+          </div>
+          ${g.notes ? `
+            <div class="profile-notes">
+              <strong>Notes:</strong><br>${g.notes.replace(/\n/g, '<br>')}
+            </div>
+          ` : ''}
           <button class="btn-cancel" onclick="closePopup()">Close</button>
         </div>
       `;
       document.body.appendChild(popup);
     }
+
+    // ... (your other functions: checkoutGauge, confirmCheckout, checkinGauge, confirmCheckIn, checkoutToCalibration, returnFromCalibration, editNotes, saveNotes, editGage, saveEdit, deleteGage, exportBackup, importBackup, handleImport, checkAutoBackup, showFullHistory, exportHistory, searchGages, performSearch, clearSearch)
 
     function checkoutGauge(i) {
       const g = gauges[i];
@@ -441,7 +498,7 @@
       const newTotalUses = (gauges[i].totalUses || 0) + usageAmount;
       gauges[i].inUse = false;
       gauges[i].currentJob = '';
-      gauges[i].checkedOutBy = null;  // Clear checked out by
+      gauges[i].checkedOutBy = null;
       gauges[i].totalUses = newTotalUses;
       gauges[i].checkedInBy = currentEmployee;
       gauges[i].lastUsageAmount = usageAmount;
@@ -682,7 +739,6 @@
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 
-    // Initial load
     loadGages();
   </script>
 </body>
