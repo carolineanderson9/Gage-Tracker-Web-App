@@ -18,7 +18,6 @@
     background: linear-gradient(135deg, #f6f8fc 0%, #d9e3f0 100%);
     min-height: 100vh; color: #2c3e50;
   }
-
   .fab {
     position: fixed; bottom: 32px; right: 32px;
     width: 60px; height: 60px; border-radius: 50%;
@@ -28,12 +27,10 @@
     z-index: 999; cursor: pointer;
   }
   .fab:active { transform: scale(0.95); }
-
   .login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; }
   .login-box { background: white; padding: 32px; border-radius: 12px; width: 360px; max-width: 90%; box-shadow: 0 6px 20px rgba(0,0,0,0.2); text-align: center; }
   .login-input { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
   .login-btn { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
-
   .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 1000; display: none; }
   .popup-box { background: white; padding: 32px; border-radius: 12px; max-width: 95%; width: 480px; max-height: 85vh; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.2); position: relative; }
   .popup-box label { display: block; margin: 8px 0 4px; text-align: left; font-weight: 600; color: #4b5563; }
@@ -41,12 +38,10 @@
   .popup-btn-group { display: flex; gap: 12px; margin-top: 20px; }
   .btn-save { background: #10b981; color: white; flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; }
   .btn-cancel { background: #9ca3af; color: white; flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; }
-
   .container { padding: 24px; background: white; min-height: 100vh; display: none; }
   .employee-info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
-
   .btn, .logout-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
   .logout-btn { background: #ef4444; }
   .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
@@ -54,20 +49,16 @@
   .menu-item { padding: 12px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-size: 14px; }
   .menu-item:last-child { border-bottom: none; }
   .menu-item:hover { background: #f9fafb; }
-
   #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; flex-direction: column; }
   @media (min-width: 769px) { #searchSection { flex-direction: row; } }
   .search-wrapper { position: relative; flex: 1; }
   #searchInput { width: 100%; padding: 12px 36px 12px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
   #clearSearch { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; display: none; }
-
   #categoryTabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; padding-bottom: 8px; }
   #categoryTabs button { background: #e5e7eb; color: #4b5563; border: none; border-radius: 20px; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
   #categoryTabs button.active { background: #3b82f6; color: white; }
-
   .empty-state { text-align: center; padding: 64px 16px; color: #6b7280; background: #f9fafb; border-radius: 12px; margin: 32px 0; }
   .empty-state .icon { font-size: 80px; margin-bottom: 16px; opacity: 0.6; }
-
   .gage-item { background: white; margin: 16px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6; overflow: hidden; }
   .gage-header { padding: 16px; background: #f9fafb; cursor: pointer; border-bottom: 1px solid #e5e7eb; }
   .gage-id { font-weight: 600; font-size: 18px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; }
@@ -76,22 +67,19 @@
   .detail-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
   .gage-actions { padding: 16px; background: #f9fafb; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; border-top: 1px solid #e5e7eb; }
   .gage-actions button { padding: 8px 16px; min-height: 36px; font-weight: 600; border: none; border-radius: 8px; color: white; cursor: pointer; }
-
   /* Distinct button colors */
-  .btn-checkout { background: #f59e0b; }              /* Orange */
-  .btn-calibration { background: #8b5cf6; }           /* Purple */
-  .btn-return-calibration { background: #eab308; }    /* Yellow */
-  .btn-checkin { background: #059669; }               /* Bright emerald green - distinct */
-  .btn-notes { background: #14b8a6; }                 /* Teal - different from Check In */
-  .btn-edit { background: #06b6d4; }                  /* Cyan */
-  .btn-delete { background: #ef4444; }                /* Red */
-
+  .btn-checkout { background: #f59e0b; } /* Orange */
+  .btn-calibration { background: #8b5cf6; } /* Purple */
+  .btn-return-calibration { background: #eab308; } /* Yellow */
+  .btn-checkin { background: #059669; } /* Bright emerald green - distinct */
+  .btn-notes { background: #14b8a6; } /* Teal - different from Check In */
+  .btn-edit { background: #06b6d4; } /* Cyan */
+  .btn-delete { background: #ef4444; } /* Red */
   .status-available { background: #d1fae5; color: #065f46; }
   .status-in-use { background: #fef3c7; color: #92400e; }
   .status-calibration { background: #ede9fe; color: #6d28d9; }
   .status-limit { background: #fee2e2; color: #b91c1c; }
   .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
-
   /* Professional profile layout */
   .profile-info { display: grid; gap: 12px; margin: 16px 0; }
   .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
@@ -101,7 +89,6 @@
 </style>
 </head>
 <body>
-
   <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
       <h2>Employee Login</h2>
@@ -110,23 +97,19 @@
       <button class="login-btn" id="continueBtn">Continue</button>
     </div>
   </div>
-
   <div class="container" id="mainApp">
     <div class="employee-info">
       <strong>Logged in as: <span id="currentEmployee"></span></strong>
       <button class="menu-btn" id="menuBtn">⋯</button>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
-
     <div class="menu-popup" id="menuPopup">
       <button class="menu-item" onclick="exportBackup(); toggleMenu()">Export Backup</button>
       <button class="menu-item" onclick="importBackup(); toggleMenu()">Import Backup</button>
       <button class="menu-item" onclick="showFullHistory(); toggleMenu()">View History</button>
     </div>
-
     <h1>Gage Tracker</h1>
     <p class="subtitle">Excel Tool & Mfg. - Gage Management System</p>
-
     <div id="searchSection">
       <div class="search-wrapper">
         <input type="text" id="searchInput" placeholder="Search by Gage ID or Size..." oninput="searchGages(this.value)">
@@ -134,33 +117,32 @@
       </div>
       <button id="searchBtn" onclick="performSearch()">Search</button>
     </div>
-
     <div id="categoryTabs">
       <button class="btn active" data-category="All">All</button>
       <button class="btn" data-category="Plug Gages">Plug Gages</button>
       <button class="btn" data-category="Ring Gages">Ring Gages</button>
       <button class="btn" data-category="Misc Gages">Misc Gages</button>
     </div>
-
     <div id="gaugesList"></div>
   </div>
-
   <button class="fab" aria-label="Add new gage">+</button>
-
   <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(this.files[0])">
-
   <script>
     let gauges = JSON.parse(localStorage.getItem('gauges') || '[]');
     let historyLog = JSON.parse(localStorage.getItem('historyLog') || '[]');
     let currentEmployee = '';
-    let currentCategory = 'All';
-    let currentSearchTerm = '';
+
+    function logout() {
+      currentEmployee = '';
+      document.getElementById('currentEmployee').textContent = '';
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('loginOverlay').style.display = 'flex';
+    }
 
     function saveData() {
       localStorage.setItem('gauges', JSON.stringify(gauges));
       localStorage.setItem('historyLog', JSON.stringify(historyLog));
     }
-
     function logAction(action, details) {
       historyLog.push({
         timestamp: new Date().toLocaleString(),
@@ -170,7 +152,6 @@
       });
       saveData();
     }
-
     function login() {
       const name = document.getElementById('employeeName')?.value.trim();
       if (!name) return alert('Please enter your name');
@@ -181,7 +162,6 @@
       loadGages();
       checkAutoBackup();
     }
-
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('continueBtn')?.addEventListener('click', login);
       document.getElementById('employeeName')?.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
@@ -199,12 +179,10 @@
         document.getElementById('clearSearch').style.display = document.getElementById('searchInput').value.trim() ? 'block' : 'none';
       });
     });
-
     function toggleMenu() {
       const menu = document.getElementById('menuPopup');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
-
     function addNewGage() {
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
@@ -234,7 +212,6 @@
       `;
       document.body.appendChild(popup);
     }
-
     function saveNewGage() {
       const category = document.getElementById('newCategory').value;
       const gageId = document.getElementById('newGageId').value.trim();
@@ -245,12 +222,10 @@
       const isSTI = document.getElementById('newIsSTI').checked;
       const isMetric = document.getElementById('newIsMetric').checked;
       const notes = document.getElementById('newNotes').value.trim();
-
       if (!category || !gageId || !size || !lastCalibrationDate || !calibrationDueDate || isNaN(totalUsesAllowed)) {
         alert('Please fill in all required fields');
         return;
       }
-
       gauges.push({
         category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
         isSTI, isMetric, notes, totalUses: 0, inUse: false, usageLimitReached: false,
@@ -262,7 +237,6 @@
       closePopup();
       loadGages(currentSearchTerm);
     }
-
     function loadGages(searchTerm = '') {
       currentSearchTerm = searchTerm;
       const list = document.getElementById('gaugesList');
@@ -270,16 +244,13 @@
       let html = '';
       let foundAny = false;
       const lowerSearch = searchTerm.toLowerCase().trim();
-
       gauges.forEach((g, i) => {
         if (currentCategory !== 'All' && g.category !== currentCategory) return;
         if (lowerSearch && !g.gageId.toLowerCase().includes(lowerSearch) && !g.size.toLowerCase().includes(lowerSearch)) return;
         foundAny = true;
-
         let status = 'AVAILABLE', statusClass = 'status-available';
         let checkoutBtn = '', checkinBtn = '', calBtn = '', returnCalBtn = '', limitWarning = '';
         let notesIndicator = g.notes ? '<div class="notes-indicator">N</div>' : '';
-
         if (g.inUse) {
           status = 'IN USE'; statusClass = 'status-in-use';
           checkinBtn = `<button class="btn-checkin" data-index="${i}">Check In</button>`;
@@ -293,9 +264,7 @@
           checkoutBtn = `<button class="btn-checkout" data-index="${i}">Check Out</button>`;
           calBtn = `<button class="btn-calibration" data-index="${i}">To Calibration</button>`;
         }
-
         const remaining = g.totalUsesAllowed - (g.totalUses || 0);
-
         html += `
           <div class="gage-item">
             <div class="gage-header" data-index="${i}">
@@ -322,7 +291,6 @@
           </div>
         `;
       });
-
       if (!foundAny) {
         list.innerHTML += `
           <div class="empty-state">
@@ -334,7 +302,6 @@
       } else {
         list.innerHTML += html;
       }
-
       // Attach event listeners
       document.querySelectorAll('.gage-header').forEach(header => {
         header.addEventListener('click', () => showGageProfile(parseInt(header.dataset.index)));
@@ -361,7 +328,6 @@
         btn.addEventListener('click', e => { e.stopPropagation(); deleteGage(parseInt(btn.dataset.index)); });
       });
     }
-
     function showGageProfile(i) {
       const g = gauges[i];
       const remaining = g.totalUsesAllowed - (g.totalUses || 0);
@@ -435,9 +401,6 @@
       `;
       document.body.appendChild(popup);
     }
-
-    // ... (your other functions: checkoutGauge, confirmCheckout, checkinGauge, confirmCheckIn, checkoutToCalibration, returnFromCalibration, editNotes, saveNotes, editGage, saveEdit, deleteGage, exportBackup, importBackup, handleImport, checkAutoBackup, showFullHistory, exportHistory, searchGages, performSearch, clearSearch)
-
     function checkoutGauge(i) {
       const g = gauges[i];
       if (g.usageLimitReached) return alert('USAGE LIMIT REACHED - Cannot check out!');
@@ -457,7 +420,6 @@
       `;
       document.body.appendChild(popup);
     }
-
     function confirmCheckout(i) {
       const job = document.getElementById('checkoutJob').value.trim();
       const date = document.getElementById('checkoutDate').value;
@@ -469,11 +431,9 @@
       gauges[i].toCalibration = false;
       logAction('Checked out gage', { gageId: gauges[i].gageId, job });
       saveData();
-      alert(`${job} checked out by ${currentEmployee}`);
       closePopup();
       loadGages(currentSearchTerm);
     }
-
     function checkinGauge(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -491,7 +451,6 @@
       `;
       document.body.appendChild(popup);
     }
-
     function confirmCheckIn(i) {
       const usageAmount = parseInt(document.getElementById('usageAmount').value);
       if (isNaN(usageAmount) || usageAmount < 0) return alert('Please enter a valid number');
@@ -507,22 +466,17 @@
       gauges[i].toCalibration = false;
       logAction('Checked in gage', { gageId: gauges[i].gageId, usageAmount });
       saveData();
-      const message = gauges[i].usageLimitReached ? `${gauges[i].gageId} checked in - USAGE LIMIT REACHED!` : `${gauges[i].gageId} checked in. Usage: ${usageAmount}`;
-      alert(message);
       closePopup();
       loadGages(currentSearchTerm);
     }
-
     function checkoutToCalibration(i) {
       gauges[i].toCalibration = true;
       gauges[i].inUse = false;
       gauges[i].checkedOutBy = currentEmployee;
       logAction('Sent to calibration', { gageId: gauges[i].gageId });
       saveData();
-      alert(`${gauges[i].gageId} sent to calibration by ${currentEmployee}`);
       loadGages(currentSearchTerm);
     }
-
     function returnFromCalibration(i) {
       gauges[i].toCalibration = false;
       gauges[i].lastCalibrationDate = new Date().toISOString().split('T')[0];
@@ -531,10 +485,8 @@
       gauges[i].checkedOutBy = null;
       logAction('Returned from calibration', { gageId: gauges[i].gageId });
       saveData();
-      alert(`${gauges[i].gageId} returned from calibration - reset to 0 uses`);
       loadGages(currentSearchTerm);
     }
-
     function editNotes(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -552,16 +504,13 @@
       `;
       document.body.appendChild(popup);
     }
-
     function saveNotes(i) {
       gauges[i].notes = document.getElementById('editNotes').value.trim();
       logAction('Updated notes', { gageId: gauges[i].gageId });
       saveData();
-      alert('Notes saved!');
       closePopup();
       loadGages(currentSearchTerm);
     }
-
     function editGage(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -593,7 +542,6 @@
       `;
       document.body.appendChild(popup);
     }
-
     function saveEdit(i) {
       const category = document.getElementById('editCategory').value;
       const gageId = document.getElementById('editGageId').value.trim();
@@ -604,24 +552,19 @@
       const isSTI = document.getElementById('editIsSTI').checked;
       const isMetric = document.getElementById('editIsMetric').checked;
       const notes = document.getElementById('editNotes').value.trim();
-
       gauges[i] = { ...gauges[i], category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric, notes };
       logAction('Edited gage', { gageId, category, size });
       saveData();
-      alert('Gage updated successfully!');
       closePopup();
       loadGages(currentSearchTerm);
     }
-
     function deleteGage(i) {
       if (!confirm('Are you sure you want to remove this gage?')) return;
       const removed = gauges.splice(i, 1)[0];
       logAction('Deleted gage', { gageId: removed.gageId });
       saveData();
-      alert('Gage removed');
       loadGages(currentSearchTerm);
     }
-
     function exportBackup() {
       const data = {
         gauges,
@@ -635,15 +578,10 @@
       a.download = `gage-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      alert('Backup exported successfully!');
     }
-
     function importBackup() {
-      if (confirm('This will overwrite current data. Continue?')) {
-        document.getElementById('importFile').click();
-      }
+      document.getElementById('importFile').click();
     }
-
     function handleImport(file) {
       if (!file) return;
       const reader = new FileReader();
@@ -654,24 +592,19 @@
           historyLog = data.historyLog || [];
           saveData();
           loadGages();
-          alert('Backup imported successfully!');
         } catch (err) {
-          alert('Invalid backup file: ' + err.message);
+          alert('Invalid backup file');
         }
       };
       reader.readAsText(file);
     }
-
     function checkAutoBackup() {
       const last = localStorage.getItem('lastBackup');
       if (!last || Date.now() - new Date(last).getTime() > 86400000) {
-        if (confirm('It has been over 24 hours since last backup. Export now?')) {
-          exportBackup();
-          localStorage.setItem('lastBackup', Date.now().toString());
-        }
+        exportBackup();
+        localStorage.setItem('lastBackup', Date.now().toString());
       }
     }
-
     function showFullHistory() {
       let html = '';
       historyLog.slice().reverse().forEach(entry => {
@@ -692,55 +625,26 @@
           <div style="max-height:70vh; overflow-y:auto;">
             ${html || '<p style="text-align:center; color:#6b7280;">No history yet.</p>'}
           </div>
-          <button class="btn-save" onclick="exportHistory()" style="margin-top:16px;">Export History as Text</button>
         </div>
       `;
       document.body.appendChild(popup);
     }
-
-    function exportHistory() {
-      if (historyLog.length === 0) return alert("No history to export.");
-      let text = "Gage Tracker History Log\nExported: " + new Date().toLocaleString() + "\n\n";
-      historyLog.slice().reverse().forEach(entry => {
-        text += `Date: ${entry.timestamp}\nEmployee: ${entry.employee}\nAction: ${entry.action}\n`;
-        if (entry.details) {
-          text += "Details:\n";
-          Object.entries(entry.details).forEach(([k, v]) => text += `  ${k}: ${v}\n`);
-        }
-        text += "----------------------------------------\n\n";
-      });
-      const blob = new Blob([text], {type: 'text/plain'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `gage-history-${new Date().toISOString().split('T')[0]}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      alert('History exported as readable text file!');
-    }
-
     function searchGages(term) {
       loadGages(term);
     }
-
     function performSearch() {
       loadGages(document.getElementById('searchInput').value.trim());
     }
-
     function clearSearch() {
       document.getElementById('searchInput').value = '';
       document.getElementById('clearSearch').style.display = 'none';
       loadGages('');
     }
-
     function closePopup() {
       document.querySelectorAll('.popup-overlay').forEach(p => p.remove());
     }
-
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
-
     loadGages();
   </script>
 </body>
 </html>
-
