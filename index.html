@@ -30,7 +30,7 @@
   h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
   .logout-btn { background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
-  .filter-btn { padding: 8px 16px; border: none; border-radius: 9999px; cursor: pointer; font-size: 14px; background: #3b82f6; color: white; white-space: nowrap; }
+  .filter-btn { padding: 8px 20px; border: none; border-radius: 9999px; cursor: pointer; font-size: 14px; background: #3b82f6; color: white; }
   .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
   .menu-popup { position: absolute; top: 48px; right: 16px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; min-width: 180px; }
   .menu-item { padding: 12px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-size: 14px; }
@@ -88,6 +88,7 @@
     </div>
 
     <div class="menu-popup" id="menuPopup">
+      <button class="menu-item" onclick="toggleMenu()" style="color:#ef4444; font-weight:600;">Close Menu</button>
       <button class="menu-item" onclick="exportBackup(); toggleMenu()">Export Backup</button>
       <button class="menu-item" onclick="importBackup(); toggleMenu()">Import Backup</button>
       <button class="menu-item" onclick="showFullHistory(); toggleMenu()">View Full History</button>
@@ -188,7 +189,7 @@
             <option value="Ring Gages">Ring Gages</option>
           </select>
           <div class="popup-btn-group">
-            <button class="btn-save" onclick="applyFilters()">Apply</button>
+            <button class="btn-save" onclick="applyFilters()">Apply Filters</button>
             <button class="btn-cancel" onclick="closePopup()">Cancel</button>
           </div>
         </div>`;
@@ -229,8 +230,6 @@
         </div>`;
       document.body.appendChild(popup);
     }
-
-    // ... (All other functions are included below - full code)
 
     function saveNewGage() {
       const gageId = document.getElementById('newGageId').value.trim();
