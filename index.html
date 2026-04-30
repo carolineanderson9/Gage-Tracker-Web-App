@@ -29,18 +29,18 @@
   .employee-info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
-  .logout-btn { background: #ef4444; }
+  .logout-btn { background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
   .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0 8px; }
   .menu-popup { position: absolute; top: 48px; right: 16px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; min-width: 180px; }
   .menu-item { padding: 12px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; width: 100%; text-align: left; }
   .menu-item:hover { background: #f9fafb; }
-  #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .search-wrapper { position: relative; flex: 1; min-width: 200px; }
+  #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .search-wrapper { position: relative; }
   #searchInput { width: 100%; padding: 12px 36px 12px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
   #clearSearch { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; }
-  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-  #statusFilters button { padding: 8px 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; background: #e5e7eb; }
-  #statusFilters button.active { background: #3b82f6; color: white; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .pill-btn { padding: 8px 16px; border: none; border-radius: 9999px; cursor: pointer; font-size: 14px; background: #e5e7eb; color: #4b5563; white-space: nowrap; }
+  .pill-btn.active { background: #3b82f6; color: white; }
   .gage-item { background: white; margin: 16px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6; overflow: hidden; }
   .gage-header { padding: 16px; background: #f9fafb; cursor: pointer; border-bottom: 1px solid #e5e7eb; }
   .gage-id { font-weight: 600; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
@@ -60,12 +60,11 @@
   .status-in-use { background: #fef3c7; color: #92400e; }
   .status-calibration { background: #ede9fe; color: #6d28d9; }
   .status-limit { background: #fee2e2; color: #b91c1c; }
-  .limit-warning, .overdue-warning { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin: 12px 0; }
+  .overdue-warning { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin: 12px 0; }
   .profile-info { display: grid; gap: 12px; margin: 16px 0; }
   .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
   .profile-label { font-weight: 600; color: #4b5563; flex: 1; }
   .profile-value { font-weight: 500; color: #1f2937; text-align: right; flex: 2; }
-  .profile-notes { margin: 20px 0; }
   .history-section { margin-top: 24px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
   .history-item { padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px; font-size: 14px; border-left: 3px solid #3b82f6; }
 </style>
@@ -101,27 +100,21 @@
         <input type="text" id="searchInput" placeholder="Search by Gage ID or Size..." oninput="loadGages()">
         <button id="clearSearch" onclick="clearSearch()">×</button>
       </div>
-      <select id="sortSelect" onchange="loadGages()">
-        <option value="id">Sort: Gage ID</option>
-        <option value="due">Due Date (Soonest)</option>
-        <option value="uses">Remaining Uses</option>
-        <option value="status">Status</option>
-      </select>
     </div>
 
     <div class="filter-row" id="statusFilters">
-      <button class="active" data-status="All">All</button>
-      <button data-status="Available">Available</button>
-      <button data-status="In Use">In Use</button>
-      <button data-status="Calibration">Calibration</button>
-      <button data-status="Due Soon">Due Soon</button>
+      <button class="pill-btn active" data-status="All">All</button>
+      <button class="pill-btn" data-status="Available">Available</button>
+      <button class="pill-btn" data-status="In Use">In Use</button>
+      <button class="pill-btn" data-status="Calibration">Calibration</button>
+      <button class="pill-btn" data-status="Due Soon">Due Soon</button>
     </div>
 
-    <div id="categoryTabs">
-      <button class="btn active" data-category="All">All Categories</button>
-      <button class="btn" data-category="Plug Gages">Plug Gages</button>
-      <button class="btn" data-category="Ring Gages">Ring Gages</button>
-      <button class="btn" data-category="Misc Gages">Misc Gages</button>
+    <div class="filter-row" id="categoryTabs">
+      <button class="pill-btn active" data-category="All">All</button>
+      <button class="pill-btn" data-category="Plug Gages">Plug Gages</button>
+      <button class="pill-btn" data-category="Ring Gages">Ring Gages</button>
+      <button class="pill-btn" data-category="Misc Gages">Misc Gages</button>
     </div>
 
     <div id="gaugesList"></div>
@@ -163,7 +156,6 @@
       document.getElementById('loginOverlay').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadGages();
-      checkAutoBackup();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -172,20 +164,22 @@
       document.querySelector('.fab').addEventListener('click', addNewGage);
       document.getElementById('menuBtn').addEventListener('click', toggleMenu);
 
-      document.querySelectorAll('#categoryTabs button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#categoryTabs button').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentCategory = btn.dataset.category;
-          loadGages();
-        });
-      });
-
+      // Status Filters
       document.querySelectorAll('#statusFilters button').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#statusFilters button').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentStatusFilter = btn.dataset.status;
+          loadGages();
+        });
+      });
+
+      // Category Tabs
+      document.querySelectorAll('#categoryTabs button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#categoryTabs button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
           loadGages();
         });
       });
@@ -221,8 +215,7 @@
             <button class="btn-save" onclick="saveNewGage()">Save</button>
             <button class="btn-cancel" onclick="closePopup()">Cancel</button>
           </div>
-        </div>
-      `;
+        </div>`;
       document.body.appendChild(popup);
     }
 
@@ -247,14 +240,13 @@
       gauges.push({ category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric, notes, totalUses: 0, inUse: false, usageLimitReached: false, checkedOutBy: null, machinist: null });
       logAction('Added new gage', { gageId, category, size });
       saveData();
-      alert('New gage added!');
+      alert('New gage added successfully!');
       closePopup();
       loadGages();
     }
 
     function loadGages() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-      const sortBy = document.getElementById('sortSelect').value;
       const list = document.getElementById('gaugesList');
       list.innerHTML = '<h3>Gage Catalog</h3>';
 
@@ -267,16 +259,6 @@
         if (currentStatusFilter === 'Calibration') return g.toCalibration;
         if (currentStatusFilter === 'Due Soon') return isOverdue(g.calibrationDueDate);
         return true;
-      });
-
-      filtered.sort((a, b) => {
-        if (sortBy === 'due') return new Date(a.calibrationDueDate) - new Date(b.calibrationDueDate);
-        if (sortBy === 'uses') return (a.totalUsesAllowed - (a.totalUses||0)) - (b.totalUsesAllowed - (b.totalUses||0));
-        if (sortBy === 'status') {
-          const order = {true:1, false:4}; // inUse first
-          return (a.inUse ? 1 : a.toCalibration ? 2 : 4) - (b.inUse ? 1 : b.toCalibration ? 2 : 4);
-        }
-        return a.gageId.localeCompare(b.gageId);
       });
 
       let html = '';
@@ -306,10 +288,14 @@
 
       list.innerHTML += html || `<div class="empty-state"><div class="icon">🔍</div><h2>No gauges found</h2></div>`;
 
-      // Attach listeners
-      document.querySelectorAll('.gage-header').forEach(el => el.onclick = () => showGageProfile(+el.dataset.i));
+      // Click gage to open profile
+      document.querySelectorAll('.gage-header').forEach(el => {
+        el.addEventListener('click', () => showGageProfile(+el.dataset.i));
+      });
+
+      // Action buttons
       document.querySelectorAll('[data-i]').forEach(btn => {
-        btn.onclick = (e) => {
+        btn.addEventListener('click', e => {
           e.stopPropagation();
           const i = +btn.dataset.i;
           if (btn.classList.contains('btn-checkout')) checkoutGauge(i);
@@ -318,13 +304,13 @@
           else if (btn.classList.contains('btn-return-calibration')) returnFromCalibration(i);
           else if (btn.classList.contains('btn-edit')) editGage(i);
           else if (btn.classList.contains('btn-delete')) deleteGage(i);
-        };
+        });
       });
     }
 
     function showGageProfile(i) {
       const g = gauges[i];
-      const historyHTML = historyLog.filter(h => h.details?.gageId === g.gageId)
+      const historyHTML = historyLog.filter(h => h.details && h.details.gageId === g.gageId)
         .reverse().map(h => `<div class="history-item"><strong>${h.timestamp} — ${h.employee}</strong><br>${h.action}<br><small>${JSON.stringify(h.details)}</small></div>`).join('') || '<p style="color:#6b7280;text-align:center;">No history yet.</p>';
 
       const popup = document.createElement('div');
@@ -384,7 +370,7 @@
     function confirmCheckout(i) {
       const job = document.getElementById('checkoutJob').value.trim();
       const machinist = document.getElementById('machinistName').value.trim();
-      if (!job || !machinist) return alert('Job # and Machinist Name required');
+      if (!job || !machinist) return alert('Job # and Machinist Name are required');
       gauges[i].inUse = true;
       gauges[i].currentJob = job;
       gauges[i].machinist = machinist;
@@ -452,11 +438,11 @@
       popup.style.display = 'flex';
       popup.innerHTML = `
         <div class="popup-box">
-          <h3>Edit Gage</h3>
-          <label>Category:</label><select id="editCategory"><option>${g.category}</option><option>Plug Gages</option><option>Ring Gages</option><option>Misc Gages</option></select>
+          <h3>Edit Gage: ${g.gageId}</h3>
+          <label>Category:</label><select id="editCategory"><option selected>${g.category}</option><option>Plug Gages</option><option>Ring Gages</option><option>Misc Gages</option></select>
           <label>Gage ID:</label><input type="text" id="editGageId" value="${g.gageId}">
           <label>Size:</label><input type="text" id="editSize" value="${g.size}">
-          <label>Calibration Due:</label><input type="date" id="editDue" value="${g.calibrationDueDate}">
+          <label>Calibration Due Date:</label><input type="date" id="editDue" value="${g.calibrationDueDate}">
           <label>Total Uses Allowed:</label><input type="number" id="editUses" value="${g.totalUsesAllowed}">
           <label>Notes:</label><textarea id="editNotes">${g.notes||''}</textarea>
           <div class="popup-btn-group">
@@ -469,7 +455,7 @@
 
     function saveEdit(i) {
       const newId = document.getElementById('editGageId').value.trim();
-      if (newId !== gauges[i].gageId && gauges.some((g,idx) => idx !== i && g.gageId.toLowerCase() === newId.toLowerCase())) {
+      if (newId !== gauges[i].gageId && gauges.some((g, idx) => idx !== i && g.gageId.toLowerCase() === newId.toLowerCase())) {
         return alert('ID already exists!');
       }
       gauges[i].category = document.getElementById('editCategory').value;
@@ -492,16 +478,18 @@
       loadGages();
     }
 
-    function exportBackup() { /* same as before */ 
-      const data = {gauges, historyLog, timestamp: new Date().toISOString()};
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    function exportBackup() {
+      const data = { gauges, historyLog, timestamp: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `gage-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `gage-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
     }
 
-    function importBackup() { document.getElementById('importFile').click(); }
+    function importBackup() {
+      document.getElementById('importFile').click();
+    }
 
     function handleImport(file) {
       const reader = new FileReader();
@@ -512,26 +500,29 @@
           historyLog = data.historyLog || [];
           saveData();
           loadGages();
-          alert('Backup imported successfully');
-        } catch(e) { alert('Invalid file'); }
+          alert('Backup imported successfully!');
+        } catch (err) {
+          alert('Invalid backup file');
+        }
       };
       reader.readAsText(file);
     }
 
-    function checkAutoBackup() {
-      const last = localStorage.getItem('lastBackup');
-      if (!last || Date.now() - +last > 86400000) {
-        exportBackup();
-        localStorage.setItem('lastBackup', Date.now());
-      }
-    }
-
-    function showFullHistory() { /* same as before */ 
-      let html = historyLog.slice().reverse().map(e => `<div style="margin:12px 0;padding:12px;background:#f9fafb;border-radius:8px;">${e.timestamp} - ${e.employee}: ${e.action}<br><small>${JSON.stringify(e.details)}</small></div>`).join('');
+    function showFullHistory() {
+      let html = historyLog.slice().reverse().map(entry => `
+        <div style="margin:12px 0; padding:12px; background:#f9fafb; border-radius:8px; border:1px solid #e5e7eb;">
+          <strong>${entry.timestamp} - ${entry.employee}</strong>: ${entry.action}<br>
+          <small>${JSON.stringify(entry.details)}</small>
+        </div>`).join('');
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
       popup.style.display = 'flex';
-      popup.innerHTML = `<div class="popup-box"><button class="btn-cancel" onclick="closePopup()" style="float:right;">Close</button><h3>Full History</h3><div style="max-height:70vh;overflow:auto;">${html||'<p>No history yet.</p>'}</div></div>`;
+      popup.innerHTML = `
+        <div class="popup-box">
+          <button class="btn-cancel" onclick="closePopup()" style="float:right;">Close</button>
+          <h3>Full Action History</h3>
+          <div style="max-height:70vh; overflow-y:auto;">${html || '<p>No history yet.</p>'}</div>
+        </div>`;
       document.body.appendChild(popup);
     }
 
@@ -546,7 +537,7 @@
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
 
-    loadGages();   // initial load
+    loadGages();
   </script>
 </body>
 </html>
