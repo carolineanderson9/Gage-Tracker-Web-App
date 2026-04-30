@@ -30,7 +30,7 @@
   h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
   .logout-btn { background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
-  .filter-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
+  .filter-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 10px 16px; cursor: pointer; width: 100%; }
   .menu-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0 12px; }
   .menu-popup { position: absolute; top: 55px; right: 16px; background: white; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; min-width: 200px; }
   .menu-item { padding: 14px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; width: 100%; text-align: left; font-size: 15px; }
@@ -89,6 +89,7 @@
     </div>
 
     <div class="menu-popup" id="menuPopup">
+      <button class="btn-cancel" onclick="toggleMenu()" style="float:right; margin:8px 12px; padding:6px 12px;">Close</button>
       <button class="menu-item" onclick="exportBackup(); toggleMenu()">Export Backup</button>
       <button class="menu-item" onclick="importBackup(); toggleMenu()">Import Backup</button>
       <button class="menu-item" onclick="showFullHistory(); toggleMenu()">View Full History</button>
@@ -104,8 +105,8 @@
       </div>
     </div>
 
-    <div id="filterRow" style="padding: 0 16px 16px; background: #f9fafb;">
-      <button class="filter-btn" id="filterBtn" style="width: 100%;">Filters</button>
+    <div id="filterRow">
+      <button class="filter-btn" id="filterBtn">Filters</button>
     </div>
 
     <div id="gaugesList"></div>
@@ -203,6 +204,7 @@
       loadGages();
     }
 
+    // Add New Gage, Save, LoadGages, Profile, Checkout, etc. (all functions remain the same as previous full version)
     function addNewGage() {
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
@@ -315,7 +317,7 @@
       });
     }
 
-    // All other functions (showGageProfile, checkout, checkin, edit, etc.) are unchanged and fully included below
+    // === All remaining functions (identical to previous full version) ===
     function showGageProfile(i) {
       const g = gauges[i];
       const historyHTML = historyLog.filter(h => h.details && h.details.gageId === g.gageId)
