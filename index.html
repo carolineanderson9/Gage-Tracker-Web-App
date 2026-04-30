@@ -29,17 +29,18 @@
   .employee-info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   h1 { text-align: center; color: #1f2937; margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; font-size: 16px; }
-  .logout-btn, .filter-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
-  .logout-btn { background: #ef4444; }
+  .logout-btn { background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
+  .filter-btn { background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; padding: 8px 16px; cursor: pointer; }
   .menu-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0 12px; }
   .menu-popup { position: absolute; top: 55px; right: 16px; background: white; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 100; display: none; padding: 8px 0; min-width: 200px; }
-  .menu-item { padding: 14px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; background: none; border: none; width: 100%; text-align: left; font-size: 15px; }
+  .menu-item { padding: 14px 20px; color: #4b5563; border-bottom: 1px solid #f3f4f6; cursor: pointer; width: 100%; text-align: left; font-size: 15px; }
   .menu-item:last-child { border-bottom: none; }
   .menu-item:hover { background: #f9fafb; }
-  #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 12px; align-items: center; }
-  .search-wrapper { position: relative; flex: 1; }
+  #searchSection { position: sticky; top: 0; z-index: 10; background: #f9fafb; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .search-wrapper { position: relative; }
   #searchInput { width: 100%; padding: 12px 36px 12px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; }
   #clearSearch { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; }
+  #filterRow { padding: 0 16px 16px; background: #f9fafb; }
   .gage-item { background: white; margin: 16px 0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid #3b82f6; overflow: hidden; }
   .gage-header { padding: 16px; background: #f9fafb; cursor: pointer; border-bottom: 1px solid #e5e7eb; }
   .gage-id { font-weight: 600; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
@@ -82,7 +83,6 @@
     <div class="employee-info">
       <strong>Logged in as: <span id="currentEmployee"></span></strong>
       <div>
-        <button class="filter-btn" id="filterBtn">Filters</button>
         <button class="menu-btn" id="menuBtn">⋯</button>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
@@ -102,6 +102,10 @@
         <input type="text" id="searchInput" placeholder="Search by Gage ID or Size..." oninput="loadGages()">
         <button id="clearSearch" onclick="clearSearch()">×</button>
       </div>
+    </div>
+
+    <div id="filterRow" style="padding: 0 16px 16px; background: #f9fafb;">
+      <button class="filter-btn" id="filterBtn" style="width: 100%;">Filters</button>
     </div>
 
     <div id="gaugesList"></div>
@@ -311,6 +315,7 @@
       });
     }
 
+    // All other functions (showGageProfile, checkout, checkin, edit, etc.) are unchanged and fully included below
     function showGageProfile(i) {
       const g = gauges[i];
       const historyHTML = historyLog.filter(h => h.details && h.details.gageId === g.gageId)
