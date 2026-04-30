@@ -67,36 +67,37 @@
   .detail-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
   .gage-actions { padding: 16px; background: #f9fafb; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; border-top: 1px solid #e5e7eb; }
   .gage-actions button { padding: 8px 16px; min-height: 36px; font-weight: 600; border: none; border-radius: 8px; color: white; cursor: pointer; }
-  /* Distinct button colors */
-  .btn-checkout { background: #f59e0b; } /* Orange */
-  .btn-calibration { background: #8b5cf6; } /* Purple */
-  .btn-return-calibration { background: #eab308; } /* Yellow */
-  .btn-checkin { background: #059669; } /* Bright emerald green - distinct */
-  .btn-notes { background: #14b8a6; } /* Teal - different from Check In */
-  .btn-edit { background: #06b6d4; } /* Cyan */
-  .btn-delete { background: #ef4444; } /* Red */
+  .btn-checkout { background: #f59e0b; }
+  .btn-calibration { background: #8b5cf6; }
+  .btn-return-calibration { background: #eab308; }
+  .btn-checkin { background: #059669; }
+  .btn-notes { background: #14b8a6; }
+  .btn-edit { background: #06b6d4; }
+  .btn-delete { background: #ef4444; }
   .status-available { background: #d1fae5; color: #065f46; }
   .status-in-use { background: #fef3c7; color: #92400e; }
   .status-calibration { background: #ede9fe; color: #6d28d9; }
   .status-limit { background: #fee2e2; color: #b91c1c; }
   .limit-warning { background: #fee2e2 !important; color: #b91c1c !important; padding: 16px; font-weight: 600; text-align: center; }
-  /* Professional profile layout */
   .profile-info { display: grid; gap: 12px; margin: 16px 0; }
   .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
   .profile-label { font-weight: 600; color: #4b5563; flex: 1; }
   .profile-value { font-weight: 500; color: #1f2937; text-align: right; flex: 2; }
   .profile-notes { margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; white-space: pre-wrap; line-height: 1.5; }
+  .history-section { margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+  .history-item { padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px; font-size: 14px; border-left: 3px solid #3b82f6; }
 </style>
 </head>
 <body>
   <div class="login-overlay" id="loginOverlay">
     <div class="login-box">
-      <h2>Employee Login</h2>
+      <h2>QC Login</h2>
       <p>Enter your name to access Gage Tracker</p>
       <input type="text" class="login-input" id="employeeName" placeholder="e.g., John Smith">
       <button class="login-btn" id="continueBtn">Continue</button>
     </div>
   </div>
+
   <div class="container" id="mainApp">
     <div class="employee-info">
       <strong>Logged in as: <span id="currentEmployee"></span></strong>
@@ -125,16 +126,21 @@
     </div>
     <div id="gaugesList"></div>
   </div>
+
   <button class="fab" aria-label="Add new gage">+</button>
   <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(this.files[0])">
+
   <script>
     let gauges = JSON.parse(localStorage.getItem('gauges') || '[]');
     let historyLog = JSON.parse(localStorage.getItem('historyLog') || '[]');
     let currentEmployee = '';
+    let currentSearchTerm = '';
+    let currentCategory = 'All';
 
     function logout() {
       currentEmployee = '';
       document.getElementById('currentEmployee').textContent = '';
+      document.getElementById('employeeName').value = '';   // ← Clears login box
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('loginOverlay').style.display = 'flex';
     }
@@ -143,6 +149,7 @@
       localStorage.setItem('gauges', JSON.stringify(gauges));
       localStorage.setItem('historyLog', JSON.stringify(historyLog));
     }
+
     function logAction(action, details) {
       historyLog.push({
         timestamp: new Date().toLocaleString(),
@@ -152,8 +159,9 @@
       });
       saveData();
     }
+
     function login() {
-      const name = document.getElementById('employeeName')?.value.trim();
+      const name = document.getElementById('employeeName').value.trim();
       if (!name) return alert('Please enter your name');
       currentEmployee = name;
       document.getElementById('currentEmployee').textContent = name;
@@ -162,11 +170,12 @@
       loadGages();
       checkAutoBackup();
     }
+
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('continueBtn')?.addEventListener('click', login);
-      document.getElementById('employeeName')?.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
-      document.querySelector('.fab')?.addEventListener('click', addNewGage);
-      document.getElementById('menuBtn')?.addEventListener('click', toggleMenu);
+      document.getElementById('continueBtn').addEventListener('click', login);
+      document.getElementById('employeeName').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+      document.querySelector('.fab').addEventListener('click', addNewGage);
+      document.getElementById('menuBtn').addEventListener('click', toggleMenu);
       document.querySelectorAll('#categoryTabs button').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#categoryTabs button').forEach(b => b.classList.remove('active'));
@@ -175,14 +184,16 @@
           loadGages(currentSearchTerm);
         });
       });
-      document.getElementById('searchInput')?.addEventListener('input', () => {
+      document.getElementById('searchInput').addEventListener('input', () => {
         document.getElementById('clearSearch').style.display = document.getElementById('searchInput').value.trim() ? 'block' : 'none';
       });
     });
+
     function toggleMenu() {
       const menu = document.getElementById('menuPopup');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
+
     function addNewGage() {
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
@@ -212,6 +223,7 @@
       `;
       document.body.appendChild(popup);
     }
+
     function saveNewGage() {
       const category = document.getElementById('newCategory').value;
       const gageId = document.getElementById('newGageId').value.trim();
@@ -222,21 +234,25 @@
       const isSTI = document.getElementById('newIsSTI').checked;
       const isMetric = document.getElementById('newIsMetric').checked;
       const notes = document.getElementById('newNotes').value.trim();
+
       if (!category || !gageId || !size || !lastCalibrationDate || !calibrationDueDate || isNaN(totalUsesAllowed)) {
         alert('Please fill in all required fields');
         return;
       }
+
       gauges.push({
         category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed,
         isSTI, isMetric, notes, totalUses: 0, inUse: false, usageLimitReached: false,
-        checkedOutBy: null
+        checkedOutBy: null, machinist: null
       });
+
       logAction('Added new gage', { gageId, category, size });
       saveData();
       alert('New gage added successfully!');
       closePopup();
       loadGages(currentSearchTerm);
     }
+
     function loadGages(searchTerm = '') {
       currentSearchTerm = searchTerm;
       const list = document.getElementById('gaugesList');
@@ -244,13 +260,15 @@
       let html = '';
       let foundAny = false;
       const lowerSearch = searchTerm.toLowerCase().trim();
+
       gauges.forEach((g, i) => {
         if (currentCategory !== 'All' && g.category !== currentCategory) return;
         if (lowerSearch && !g.gageId.toLowerCase().includes(lowerSearch) && !g.size.toLowerCase().includes(lowerSearch)) return;
+
         foundAny = true;
         let status = 'AVAILABLE', statusClass = 'status-available';
         let checkoutBtn = '', checkinBtn = '', calBtn = '', returnCalBtn = '', limitWarning = '';
-        let notesIndicator = g.notes ? '<div class="notes-indicator">N</div>' : '';
+
         if (g.inUse) {
           status = 'IN USE'; statusClass = 'status-in-use';
           checkinBtn = `<button class="btn-checkin" data-index="${i}">Check In</button>`;
@@ -264,14 +282,15 @@
           checkoutBtn = `<button class="btn-checkout" data-index="${i}">Check Out</button>`;
           calBtn = `<button class="btn-calibration" data-index="${i}">To Calibration</button>`;
         }
+
         const remaining = g.totalUsesAllowed - (g.totalUses || 0);
+
         html += `
           <div class="gage-item">
             <div class="gage-header" data-index="${i}">
               <div class="gage-id">
                 <span>${g.gageId}</span>
                 <span class="gage-status ${statusClass}">${status}</span>
-                ${notesIndicator}
               </div>
             </div>
             <div class="gage-details">
@@ -291,6 +310,7 @@
           </div>
         `;
       });
+
       if (!foundAny) {
         list.innerHTML += `
           <div class="empty-state">
@@ -302,6 +322,7 @@
       } else {
         list.innerHTML += html;
       }
+
       // Attach event listeners
       document.querySelectorAll('.gage-header').forEach(header => {
         header.addEventListener('click', () => showGageProfile(parseInt(header.dataset.index)));
@@ -328,9 +349,29 @@
         btn.addEventListener('click', e => { e.stopPropagation(); deleteGage(parseInt(btn.dataset.index)); });
       });
     }
+
     function showGageProfile(i) {
       const g = gauges[i];
       const remaining = g.totalUsesAllowed - (g.totalUses || 0);
+
+      // Filter history for this gage only
+      const gageHistory = historyLog.filter(h => 
+        h.details && h.details.gageId === g.gageId
+      ).reverse();
+
+      let historyHTML = '';
+      if (gageHistory.length === 0) {
+        historyHTML = '<p style="color:#6b7280; text-align:center;">No history yet for this gage.</p>';
+      } else {
+        historyHTML = gageHistory.map(entry => `
+          <div class="history-item">
+            <strong>${entry.timestamp} — ${entry.employee}</strong><br>
+            ${entry.action}<br>
+            <small>${JSON.stringify(entry.details)}</small>
+          </div>
+        `).join('');
+      }
+
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
       popup.style.display = 'flex';
@@ -338,72 +379,46 @@
         <div class="popup-box">
           <h3>Gage Profile: ${g.gageId}</h3>
           <div class="profile-info">
-            <div class="profile-row">
-              <span class="profile-label">Category</span>
-              <span class="profile-value">${g.category}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Size</span>
-              <span class="profile-value">${g.size}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Last Calibration</span>
-              <span class="profile-value">${g.lastCalibrationDate || 'N/A'}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Calibration Due</span>
-              <span class="profile-value">${g.calibrationDueDate}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Uses Allowed</span>
-              <span class="profile-value">${g.totalUsesAllowed}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Used</span>
-              <span class="profile-value">${g.totalUses || 0}</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-label">Remaining Uses</span>
-              <span class="profile-value">${remaining}</span>
-            </div>
-            ${g.isSTI ? `
-              <div class="profile-row">
-                <span class="profile-label">STI Gage</span>
-                <span class="profile-value">Yes</span>
-              </div>
-            ` : ''}
-            ${g.isMetric ? `
-              <div class="profile-row">
-                <span class="profile-label">Metric Gage</span>
-                <span class="profile-value">Yes</span>
-              </div>
-            ` : ''}
+            <div class="profile-row"><span class="profile-label">Category</span><span class="profile-value">${g.category}</span></div>
+            <div class="profile-row"><span class="profile-label">Size</span><span class="profile-value">${g.size}</span></div>
+            <div class="profile-row"><span class="profile-label">Last Calibration</span><span class="profile-value">${g.lastCalibrationDate || 'N/A'}</span></div>
+            <div class="profile-row"><span class="profile-label">Calibration Due</span><span class="profile-value">${g.calibrationDueDate}</span></div>
+            <div class="profile-row"><span class="profile-label">Uses Allowed</span><span class="profile-value">${g.totalUsesAllowed}</span></div>
+            <div class="profile-row"><span class="profile-label">Used</span><span class="profile-value">${g.totalUses || 0}</span></div>
+            <div class="profile-row"><span class="profile-label">Remaining Uses</span><span class="profile-value">${remaining}</span></div>
+            ${g.isSTI ? `<div class="profile-row"><span class="profile-label">STI Gage</span><span class="profile-value">Yes</span></div>` : ''}
+            ${g.isMetric ? `<div class="profile-row"><span class="profile-label">Metric Gage</span><span class="profile-value">Yes</span></div>` : ''}
             <div class="profile-row">
               <span class="profile-label">Status</span>
               <span class="profile-value ${g.inUse ? 'status-in-use' : g.toCalibration ? 'status-calibration' : g.usageLimitReached ? 'status-limit' : 'status-available'}">
                 ${g.inUse ? 'In Use' : g.toCalibration ? 'In Calibration' : g.usageLimitReached ? 'Limit Reached' : 'Available'}
               </span>
             </div>
-            ${g.inUse && g.checkedOutBy ? `
-              <div class="profile-row">
-                <span class="profile-label">Checked Out By</span>
-                <span class="profile-value">${g.checkedOutBy}</span>
-              </div>
-            ` : ''}
+            ${g.inUse && g.checkedOutBy ? `<div class="profile-row"><span class="profile-label">Checked Out By</span><span class="profile-value">${g.checkedOutBy}</span></div>` : ''}
+            ${g.machinist ? `<div class="profile-row"><span class="profile-label">Machinist</span><span class="profile-value">${g.machinist}</span></div>` : ''}
           </div>
+
           ${g.notes ? `
             <div class="profile-notes">
               <strong>Notes:</strong><br>${g.notes.replace(/\n/g, '<br>')}
             </div>
           ` : ''}
-          <button class="btn-cancel" onclick="closePopup()">Close</button>
+
+          <div class="history-section">
+            <strong>Action History for this Gage</strong>
+            ${historyHTML}
+          </div>
+
+          <button class="btn-cancel" onclick="closePopup()" style="margin-top:20px;">Close</button>
         </div>
       `;
       document.body.appendChild(popup);
     }
+
     function checkoutGauge(i) {
       const g = gauges[i];
       if (g.usageLimitReached) return alert('USAGE LIMIT REACHED - Cannot check out!');
+
       const popup = document.createElement('div');
       popup.className = 'popup-overlay';
       popup.style.display = 'flex';
@@ -411,6 +426,7 @@
         <div class="popup-box">
           <h3>Check Out: ${g.gageId}</h3>
           <label>Job #:</label><input type="text" id="checkoutJob">
+          <label>Machinist Name:</label><input type="text" id="machinistName" placeholder="e.g. Casey">
           <label>Date:</label><input type="date" id="checkoutDate" value="${new Date().toISOString().split('T')[0]}">
           <div class="popup-btn-group">
             <button class="btn-save" onclick="confirmCheckout(${i})">Confirm</button>
@@ -420,20 +436,28 @@
       `;
       document.body.appendChild(popup);
     }
+
     function confirmCheckout(i) {
       const job = document.getElementById('checkoutJob').value.trim();
+      const machinist = document.getElementById('machinistName').value.trim();
       const date = document.getElementById('checkoutDate').value;
+
       if (!job) return alert('Please enter Job #');
+      if (!machinist) return alert('Please enter Machinist Name');
+
       gauges[i].inUse = true;
       gauges[i].currentJob = job;
+      gauges[i].machinist = machinist;
       gauges[i].checkoutDate = date;
       gauges[i].checkedOutBy = currentEmployee;
       gauges[i].toCalibration = false;
-      logAction('Checked out gage', { gageId: gauges[i].gageId, job });
+
+      logAction('Checked out gage', { gageId: gauges[i].gageId, job, machinist });
       saveData();
       closePopup();
       loadGages(currentSearchTerm);
     }
+
     function checkinGauge(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -451,12 +475,15 @@
       `;
       document.body.appendChild(popup);
     }
+
     function confirmCheckIn(i) {
       const usageAmount = parseInt(document.getElementById('usageAmount').value);
       if (isNaN(usageAmount) || usageAmount < 0) return alert('Please enter a valid number');
+
       const newTotalUses = (gauges[i].totalUses || 0) + usageAmount;
       gauges[i].inUse = false;
       gauges[i].currentJob = '';
+      gauges[i].machinist = null;
       gauges[i].checkedOutBy = null;
       gauges[i].totalUses = newTotalUses;
       gauges[i].checkedInBy = currentEmployee;
@@ -464,11 +491,13 @@
       gauges[i].lastCheckIn = new Date().toISOString().split('T')[0];
       gauges[i].usageLimitReached = newTotalUses >= gauges[i].totalUsesAllowed;
       gauges[i].toCalibration = false;
+
       logAction('Checked in gage', { gageId: gauges[i].gageId, usageAmount });
       saveData();
       closePopup();
       loadGages(currentSearchTerm);
     }
+
     function checkoutToCalibration(i) {
       gauges[i].toCalibration = true;
       gauges[i].inUse = false;
@@ -477,16 +506,19 @@
       saveData();
       loadGages(currentSearchTerm);
     }
+
     function returnFromCalibration(i) {
       gauges[i].toCalibration = false;
       gauges[i].lastCalibrationDate = new Date().toISOString().split('T')[0];
       gauges[i].totalUses = 0;
       gauges[i].usageLimitReached = false;
       gauges[i].checkedOutBy = null;
+      gauges[i].machinist = null;
       logAction('Returned from calibration', { gageId: gauges[i].gageId });
       saveData();
       loadGages(currentSearchTerm);
     }
+
     function editNotes(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -504,6 +536,7 @@
       `;
       document.body.appendChild(popup);
     }
+
     function saveNotes(i) {
       gauges[i].notes = document.getElementById('editNotes').value.trim();
       logAction('Updated notes', { gageId: gauges[i].gageId });
@@ -511,6 +544,7 @@
       closePopup();
       loadGages(currentSearchTerm);
     }
+
     function editGage(i) {
       const g = gauges[i];
       const popup = document.createElement('div');
@@ -542,6 +576,7 @@
       `;
       document.body.appendChild(popup);
     }
+
     function saveEdit(i) {
       const category = document.getElementById('editCategory').value;
       const gageId = document.getElementById('editGageId').value.trim();
@@ -552,12 +587,14 @@
       const isSTI = document.getElementById('editIsSTI').checked;
       const isMetric = document.getElementById('editIsMetric').checked;
       const notes = document.getElementById('editNotes').value.trim();
+
       gauges[i] = { ...gauges[i], category, gageId, size, lastCalibrationDate, calibrationDueDate, totalUsesAllowed, isSTI, isMetric, notes };
       logAction('Edited gage', { gageId, category, size });
       saveData();
       closePopup();
       loadGages(currentSearchTerm);
     }
+
     function deleteGage(i) {
       if (!confirm('Are you sure you want to remove this gage?')) return;
       const removed = gauges.splice(i, 1)[0];
@@ -565,12 +602,9 @@
       saveData();
       loadGages(currentSearchTerm);
     }
+
     function exportBackup() {
-      const data = {
-        gauges,
-        historyLog,
-        timestamp: new Date().toISOString()
-      };
+      const data = { gauges, historyLog, timestamp: new Date().toISOString() };
       const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -579,9 +613,11 @@
       a.click();
       URL.revokeObjectURL(url);
     }
+
     function importBackup() {
       document.getElementById('importFile').click();
     }
+
     function handleImport(file) {
       if (!file) return;
       const reader = new FileReader();
@@ -598,6 +634,7 @@
       };
       reader.readAsText(file);
     }
+
     function checkAutoBackup() {
       const last = localStorage.getItem('lastBackup');
       if (!last || Date.now() - new Date(last).getTime() > 86400000) {
@@ -605,6 +642,7 @@
         localStorage.setItem('lastBackup', Date.now().toString());
       }
     }
+
     function showFullHistory() {
       let html = '';
       historyLog.slice().reverse().forEach(entry => {
@@ -629,21 +667,28 @@
       `;
       document.body.appendChild(popup);
     }
+
     function searchGages(term) {
       loadGages(term);
     }
+
     function performSearch() {
       loadGages(document.getElementById('searchInput').value.trim());
     }
+
     function clearSearch() {
       document.getElementById('searchInput').value = '';
       document.getElementById('clearSearch').style.display = 'none';
       loadGages('');
     }
+
     function closePopup() {
       document.querySelectorAll('.popup-overlay').forEach(p => p.remove());
     }
+
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+    // Initial load
     loadGages();
   </script>
 </body>
